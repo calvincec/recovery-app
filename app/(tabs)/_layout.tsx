@@ -41,14 +41,17 @@ export default function TabLayout() {
         }}
       />
 
-<Tabs.Screen
-        name="NewScreen"
+		<Tabs.Screen
+        name="new"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'New',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+		//   headerShown: false,
         }}
       />
-	  
+
     </Tabs>
+
+	
   );
 }

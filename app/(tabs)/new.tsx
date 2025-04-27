@@ -4,20 +4,18 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useRouter } from 'expo-router';
 
 export default function NewScreen() {
+	const router = useRouter();
 	  return (
-	// <div>
-	// 	<p style={{ fontSize: 20, textAlign: 'center', marginTop: 20, color: 'white' }}>
-	// 		The new page is here
-	// 	</p>
-	// </div>
+
 
 	<ThemedView style={styles.titleContainer}>
 			<ThemedText type="title">Welcome!</ThemedText>
 			<HelloWave />
 			<ThemedText type='defaultSemiBold'>some text id here</ThemedText>
-			<Button title="Click me" onPress={() => alert('Button pressed!')} />
+			<Button title="Click me" onPress={() => router.push('/(tabs)/explore')} />
 	</ThemedView>
   );
 }
