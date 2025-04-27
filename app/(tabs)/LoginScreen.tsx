@@ -1,19 +1,35 @@
-import { View, Text, StyleSheet, Button } from 'react-native';
+// app/screens/LoginScreen.tsx
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const router = useRouter();
+
+  const handleSelectAccount = async (accountType: 'User' | 'Facility') => {
+    try {
+      await AsyncStorage.setItem('accountType', accountType);
+      if (accountType === 'User') {
+        router.push('/UserAuthScreen');
+      } else {
+        router.push('/FacilityAuthScreen');
+      }
+    } catch (error) {
+      console.error('Error saving account type:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select Account Type</Text>
 
       <View style={styles.buttonContainer}>
-        <Button title="User" onPress={() => router.push('/UserAuthScreen')} />
+        <Button title="User" onPress={() => handleSelectAccount('User')} />
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button title="Facility" onPress={() => router.push('/FacilityAuthScreen')} />
+        <Button title="Facility" onPress={() => handleSelectAccount('Facility')} />
       </View>
     </View>
   );
