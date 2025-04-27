@@ -1,30 +1,78 @@
 // app/screens/ProfileScreen.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
   const router = useRouter();
+  const [user, setUser] = useState<{ name: string; email: string; streak: number; profileImage: string } | null>(null);
 
-  const user = {
-    name: 'John Doe',
-    streak: 5,
-    profileImage: 'https://via.placeholder.com/150',
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('userData');
+        if (storedUserData) {
+          const parsedUser = JSON.parse(storedUserData);
+          setUser({
+            name: parsedUser.name,
+            email: parsedUser.email,
+            streak: parsedUser.streak || 0, // Default 0 if not stored
+            profileImage: 'https://via.placeholder.com/150', // Placeholder image
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', onPress: () => router.replace('/login') },
+      { 
+        text: 'Logout',
+        onPress: async () => {
+          try {
+            await AsyncStorage.removeItem('userData'); // clear user data
+  
+            // Navigate immediately
+            router.replace('/UserAuthScreen'); 
+  
+            // (Optional) If you still want a small "toast" or "flash" message,
+            // we can add a Toast later separately (like Expo Toast or react-native-toast-message)
+  
+          } catch (error) {
+            console.error('Logout Error:', error);
+            Alert.alert('Error', 'Something went wrong while logging out.');
+          }
+        }
+      },
     ]);
   };
+  
+  
 
   const handleViewStreak = () => {
-    router.push({
-      pathname: '/StreakScreen',
-      params: { streak: user.streak },
-    });
+    if (user) {
+      router.push({
+        pathname: '/StreakScreen',
+        params: { streak: user.streak.toString() },
+      });
+    }
   };
+
+  if (!user) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading Profile...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white', padding: 16 }}>
@@ -42,6 +90,7 @@ const ProfileScreen = () => {
 
       {/* User Details */}
       <Text style={{ fontSize: 18, marginBottom: 8 }}>Name: {user.name}</Text>
+      <Text style={{ fontSize: 18, marginBottom: 8 }}>Email: {user.email}</Text>
       <Text style={{ fontSize: 18, marginBottom: 24 }}>Streak: {user.streak} days</Text>
 
       {/* View Streak Button */}

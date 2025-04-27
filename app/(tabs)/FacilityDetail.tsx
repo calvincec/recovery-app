@@ -1,17 +1,58 @@
 // FacilityDetail.tsx
-import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function FacilityDetail() {
-  const { name, address, phoneNumber, description, image } = useLocalSearchParams();
+  const [facilityData, setFacilityData] = useState<{
+    facilityName: string;
+    address: string;
+    phoneNumber: string;
+    description: string;
+    imageUri: string;
+  } | null>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFacilityData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('facilityData');
+        if (storedData) {
+          setFacilityData(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.error('Error fetching facility data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFacilityData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007bff" />
+      </View>
+    );
+  }
+
+  if (!facilityData) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: 50, fontSize: 18 }}>No Facility Data Found.</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
       {/* Facility Image */}
-      {image && (
+      {facilityData.imageUri && (
         <Image
-          source={{ uri: image }}
+          source={{ uri: facilityData.imageUri }}
           style={styles.image}
           resizeMode="cover"
         />
@@ -19,31 +60,37 @@ export default function FacilityDetail() {
 
       {/* Facility Card */}
       <View style={styles.card}>
-        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.title}>{facilityData.facilityName}</Text>
 
         <Text style={styles.label}>Address:</Text>
-        <Text style={styles.text}>{address}</Text>
+        <Text style={styles.text}>{facilityData.address}</Text>
 
         <Text style={styles.label}>Phone Number:</Text>
-        <Text style={styles.text}>{phoneNumber}</Text>
+        <Text style={styles.text}>{facilityData.phoneNumber}</Text>
 
         <Text style={styles.label}>Description:</Text>
-        <Text style={styles.text}>{description}</Text>
+        <Text style={styles.text}>{facilityData.description}</Text>
       </View>
     </ScrollView>
   );
 }
 
-// --- Properly defined styles with shadow/card effect ---
+// --- Styles ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb', // light gray background
+    backgroundColor: '#f9fafb',
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
   },
   image: {
     width: '100%',
-    height: 220,
+    height: 300,
     borderRadius: 20,
     marginBottom: 20,
   },
@@ -55,7 +102,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 5, // Android shadow
+    elevation: 5,
   },
   title: {
     fontSize: 26,
