@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 const EnterFacilityDetails = () => {
   const [facilityName, setFacilityName] = useState('');
@@ -9,33 +10,62 @@ const EnterFacilityDetails = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [description, setDescription] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const handlePickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Permission to access gallery is required!');
-      return;
-    }
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Gallery access is needed to upload an image.');
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Image Picker Error:', error);
+      Alert.alert('Error', 'Something went wrong while selecting an image.');
     }
   };
 
-  const handleSubmit = () => {
-    if (!facilityName || !address || !phoneNumber || !description) {
-      alert('Please fill all fields!');
+  const handleSubmit = async () => {
+    if (!facilityName.trim() || !address.trim() || !phoneNumber.trim() || !description.trim() || !selectedImage) {
+      Alert.alert('Incomplete Details', 'Please complete all fields and upload an image.');
       return;
     }
 
-    navigation.navigate('Home'); // after success go to home or facility dashboard
+    const facilityData = {
+      facilityName,
+      address,
+      phoneNumber,
+      description,
+      imageUri: selectedImage,
+    };
+
+    try {
+      setLoading(true);
+      await AsyncStorage.setItem('facilityData', JSON.stringify(facilityData));
+
+      Alert.alert('Success', 'Facility details saved successfully!', [
+        {
+          text: 'OK',
+          onPress: () => router.replace('/FacilityDetailScreen'),
+        },
+      ]);
+    } catch (error) {
+      console.error('Saving Error:', error);
+      Alert.alert('Error', 'Unable to save facility details. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,11 +110,20 @@ const EnterFacilityDetails = () => {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleSubmit} className="bg-blue-600 p-4 rounded-xl items-center">
-        <Text className="text-white font-bold">Save and Continue</Text>
+      <TouchableOpacity
+        onPress={handleSubmit}
+        disabled={loading}
+        className={`p-4 rounded-xl items-center ${loading ? 'bg-gray-400' : 'bg-blue-600'}`}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text className="text-white font-bold">Save and Continue</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
 };
 
 export default EnterFacilityDetails;
+
