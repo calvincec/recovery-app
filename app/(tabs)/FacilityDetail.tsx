@@ -1,7 +1,16 @@
 // FacilityDetail.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 export default function FacilityDetail() {
   const [facilityData, setFacilityData] = useState<{
@@ -13,6 +22,7 @@ export default function FacilityDetail() {
   } | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchFacilityData = async () => {
@@ -31,6 +41,15 @@ export default function FacilityDetail() {
     fetchFacilityData();
   }, []);
 
+  const goToMap = () => {
+    if (facilityData?.address) {
+      router.push({
+        pathname: '/MapScreen',
+        params: { address: facilityData.address },
+      });
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -42,14 +61,15 @@ export default function FacilityDetail() {
   if (!facilityData) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: 'center', marginTop: 50, fontSize: 18 }}>No Facility Data Found.</Text>
+        <Text style={{ textAlign: 'center', marginTop: 50, fontSize: 18 }}>
+          No Facility Data Found.
+        </Text>
       </View>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      {/* Facility Image */}
       {facilityData.imageUri && (
         <Image
           source={{ uri: facilityData.imageUri }}
@@ -58,12 +78,15 @@ export default function FacilityDetail() {
         />
       )}
 
-      {/* Facility Card */}
       <View style={styles.card}>
         <Text style={styles.title}>{facilityData.facilityName}</Text>
 
         <Text style={styles.label}>Address:</Text>
-        <Text style={styles.text}>{facilityData.address}</Text>
+        <TouchableOpacity onPress={goToMap}>
+          <Text style={[styles.text, { color: '#007bff', textDecorationLine: 'underline' }]}>
+            {facilityData.address}
+          </Text>
+        </TouchableOpacity>
 
         <Text style={styles.label}>Phone Number:</Text>
         <Text style={styles.text}>{facilityData.phoneNumber}</Text>
@@ -75,7 +98,6 @@ export default function FacilityDetail() {
   );
 }
 
-// --- Styles ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
