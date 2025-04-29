@@ -1,4 +1,3 @@
-// app/screens/ProfileScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -6,10 +5,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
   const router = useRouter();
-  const [user, setUser] = useState<{ name: string; email: string; streak: number; profileImage: string } | null>(null);
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    streak: number;
+    profileImage: string;
+  } | null>(null);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    // Load user data once
+    (async () => {
       try {
 		// fetch data from currentUser in AsyncStorage
 		const currentUser = await AsyncStorage.getItem('currentUser');
@@ -23,12 +28,10 @@ const ProfileScreen = () => {
 			});
 
         }
-      } catch (error) {
-        console.error('Error loading user data:', error);
+      } catch (err) {
+        console.error('Failed to load user:', err);
       }
-    };
-
-    fetchUserData();
+    })();
   }, []);
 
   
@@ -40,59 +43,48 @@ const ProfileScreen = () => {
 
 
   };
-  
-  
+
 
   const handleViewStreak = () => {
-    if (user) {
-      router.push({
-        pathname: '/StreakScreen',
-        params: { streak: user.streak.toString() },
-      });
-    }
+    if (!user) return;
+    router.push({
+      pathname: '/StreakScreen',
+      params: { streak: user.streak.toString() },
+    });
   };
 
   if (!user) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading Profile...</Text>
+      <View style={styles.center}>
+        <Text>Loading Profile…</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white', padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' }}>
-        Profile
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Profile</Text>
 
-      {/* Profile Image */}
-      <View style={{ alignItems: 'center', marginBottom: 24 }}>
-        <Image
-          source={{ uri: user.profileImage }}
-          style={{ width: 120, height: 120, borderRadius: 60 }}
-        />
+      <View style={styles.avatarContainer}>
+        <Image source={{ uri: user.profileImage }} style={styles.avatar} />
       </View>
 
-      {/* User Details */}
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Name: {user.name}</Text>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Email: {user.email}</Text>
-      <Text style={{ fontSize: 18, marginBottom: 24 }}>Streak: {user.streak} days</Text>
+      <Text style={styles.info}>Name: {user.name}</Text>
+      <Text style={styles.info}>Email: {user.email}</Text>
+      <Text style={[styles.info, { marginBottom: 24 }]}>
+        Streak: {user.streak} days
+      </Text>
 
-      {/* View Streak Button */}
       <TouchableOpacity
         onPress={handleViewStreak}
-        style={{ backgroundColor: 'blue', padding: 16, borderRadius: 12, marginBottom: 16 }}
-      >
-        <Text style={{ color: 'white', textAlign: 'center', fontSize: 18 }}>View Streak</Text>
+        style={[styles.button, { backgroundColor: '#0066cc' }]}>
+        <Text style={styles.buttonText}>View Streak</Text>
       </TouchableOpacity>
 
-      {/* Logout Button */}
       <TouchableOpacity
         onPress={handleLogout}
-        style={{ backgroundColor: 'green', padding: 16, borderRadius: 12 }}
-      >
-        <Text style={{ color: 'white', textAlign: 'center', fontSize: 18 }}>Logout</Text>
+        style={[styles.button, { backgroundColor: '#cc0000' }]}>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
