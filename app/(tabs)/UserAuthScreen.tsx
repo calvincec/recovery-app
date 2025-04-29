@@ -8,50 +8,98 @@ export default function UserAuthScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');  // <-- New state for feedback message
+  const [messageType, setMessageType] = useState(''); 
 
   const router = useRouter();
 
-  const handleCreateAccount = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill all fields');
-      return;
-    }
-
-    try {
-      // Save user data to AsyncStorage
-      await AsyncStorage.setItem('userData', JSON.stringify({ name, email, password }));
-
-      Alert.alert('Success', 'Account created successfully!');
-      router.replace('/HomeScreen'); // Navigate to Home
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Something went wrong during account creation');
-    }
+  const saveUserData = async (newUser) => {
+	try {
+	  const existingData = await AsyncStorage.getItem('userData');
+	  let updatedData = [];
+  
+	  if (existingData !== null) {
+		updatedData = JSON.parse(existingData);
+		if (!Array.isArray(updatedData)) {
+		  updatedData = [updatedData];
+		}
+	  }
+  
+	  updatedData.push(newUser);
+	  await AsyncStorage.setItem('userData', JSON.stringify(updatedData));
+	} catch (error) {
+	  console.error('Error saving user data:', error);
+	  throw error; // rethrow so handleCreateAccount can catch it
+	}
   };
+  
+  // Function to handle account creation
+  const handleCreateAccount = async () => {
+	if (!name || !email || !password) {
+		setMessage('Please fill in all fields.');
+    	setMessageType('error');
+	  	// Alert.alert('Error', 'Please fill all fields');
+	  	return;
+	}
+  
+	const newUser = { name, email, password };
+  
+	try {
+	  await saveUserData(newUser);
+	  setMessage('Account created successfully!');
+	  setMessageType('success');
+	//   Alert.alert('Success', 'Account created successfully!');
+	  router.replace('/HomeScreen');
+	} catch (error) {
+	  Alert.alert('Error', 'Something went wrong during account creation');
+	}
+  };
+
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill all fields');
+		setMessage('Please fill in all fields.');
+    	setMessageType('error');
+    //   Alert.alert('Error', 'Please fill all fields');
       return;
     }
   
     try {
       const storedData = await AsyncStorage.getItem('userData');
       if (!storedData) {
-        Alert.alert('Error', 'No account found. Please create an account first.');
+		setMessage('No account found. Please create an account first.');
+    	setMessageType('error');
+        // Alert.alert('Error', 'No account found. Please create an account first.');
         return;
       }
   
-      const { email: storedEmail, password: storedPassword } = JSON.parse(storedData);
+	  const strvalues = storedData;
+	  const arrvalues = JSON.parse(strvalues);
+      const { email: storedEmail, password: storedPassword } = arrvalues;
+
+	  
+	  for (let i = 0; i < arrvalues.length; i++) {
+		if (arrvalues[i].email === email && arrvalues[i].password === password) {
+			setMessage('Logged in successfully!');
+			setMessageType('success');
+
+			// Alert.alert('Success', 'Logged in successfully!');
+			router.replace('/HomeScreen');
+			return;
+		}
+		if(i === arrvalues.length - 1) {
+			setMessage('Incorrect email or password. Please try again.');
+			setMessageType('error');
+			
+			
+			// Alert.alert('Incorrect Login', 'Incorrect email or password. Please try again.');
+		}
+	  }
+	  
   
-      if (email.trim() === storedEmail && password === storedPassword) {
-        Alert.alert('Success', 'Logged in successfully!');
-        router.replace('/HomeScreen');
-      } else {
-        Alert.alert('Incorrect Login', 'Incorrect email or password. Please try again.');
-      }
+
     } catch (error) {
-      console.error(error);
+      console.log("Error:", error);
       Alert.alert('Error', 'Something went wrong during login');
     }
   };
@@ -114,6 +162,13 @@ export default function UserAuthScreen() {
           <Button title="Login" onPress={handleLogin} />
         </View>
       )}
+
+		{/* Display feedback message */}
+		{message !== '' && (
+			<Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
+			{message}
+			</Text>
+		)}
     </View>
   );
 }
@@ -163,5 +218,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 10,
+  },
+  message: {
+    textAlign: 'center',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+  },
+  successText: {
+    color: 'green',
   },
 });

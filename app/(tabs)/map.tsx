@@ -8,11 +8,13 @@ import BackButton from "@/navigation/BackButton";
 
 export default function MapScreen() {
   const facilities = [
-    'Betty Ford Center California',
-    'Hazelden Betty Ford Minnesota',
-    'Promises Treatment Center Malibu',
-    'The Ranch Tennessee',
-    'Passages Malibu California'
+    // 'Betty Ford Center California',
+    // 'Hazelden Betty Ford Minnesota',
+    // 'Promises Treatment Center Malibu',
+    // 'The Ranch Tennessee',
+    // 'Passages Malibu California',
+	'Nairobi',
+	'university of nairobi',
   ];
 
   // Replace spaces with + inside each facility, then join all with +
