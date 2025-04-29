@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -63,7 +63,7 @@ export default function UserAuthScreen() {
     //   Alert.alert('Error', 'Please fill all fields');
       return;
     }
-
+  
     try {
       const storedData = await AsyncStorage.getItem('userData');
       if (!storedData) {
@@ -103,32 +103,29 @@ export default function UserAuthScreen() {
       Alert.alert('Error', 'Something went wrong during login');
     }
   };
+  
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{isCreatingAccount ? 'Create Account' : 'Login'}</Text>
 
       <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          onPress={() => setIsCreatingAccount(true)}
-          style={[styles.toggleButton, isCreatingAccount && styles.activeButton]}>
+        <TouchableOpacity onPress={() => setIsCreatingAccount(true)} style={[styles.toggleButton, isCreatingAccount && styles.activeButton]}>
           <Text style={isCreatingAccount ? styles.activeText : styles.inactiveText}>Create Account</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => setIsCreatingAccount(false)}
-          style={[styles.toggleButton, !isCreatingAccount && styles.activeButton]}>
+        <TouchableOpacity onPress={() => setIsCreatingAccount(false)} style={[styles.toggleButton, !isCreatingAccount && styles.activeButton]}>
           <Text style={!isCreatingAccount ? styles.activeText : styles.inactiveText}>Login</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.formContainer}>
-        {isCreatingAccount && (
-          <TextInput
-            placeholder="Name"
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
+      {isCreatingAccount ? (
+        <View style={styles.formContainer}>
+          <TextInput 
+            placeholder="Name" 
+            style={styles.input} 
+            value={name} 
+            onChangeText={setName} 
           />
           <TextInput 
             placeholder="Email" 
