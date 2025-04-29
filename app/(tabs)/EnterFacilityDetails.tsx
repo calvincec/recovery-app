@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 const EnterFacilityDetails = () => {
   const [facilityName, setFacilityName] = useState('');
@@ -74,7 +75,7 @@ const EnterFacilityDetails = () => {
 	  const currentFacility = await AsyncStorage.getItem('currentFacility');
 	  if (currentFacility) {
 		const parsedFacility = JSON.parse(currentFacility);
-		parsedFacility.facilityDetails = facilityData;
+		parsedFacility.facilityDetails = newFacility;
 		await AsyncStorage.setItem('currentFacility', JSON.stringify(parsedFacility));
 
 
