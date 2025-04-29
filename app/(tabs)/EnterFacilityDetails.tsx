@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator, Button } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@react-navigation/native';
-
 
 const EnterFacilityDetails = () => {
   const [facilityName, setFacilityName] = useState('');
@@ -15,7 +21,6 @@ const EnterFacilityDetails = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const router = useRouter();
   const { colors } = useTheme();
   const textColor = colors.text;
   const backgroundColor = colors.background;
@@ -51,32 +56,37 @@ const EnterFacilityDetails = () => {
   };
 
   const handleSubmit = async () => {
-    if (!facilityName.trim() || !address.trim() || !phoneNumber.trim() || !description.trim() || !selectedImage) {
+    if (
+      !facilityName.trim() ||
+      !address.trim() ||
+      !phoneNumber.trim() ||
+      !description.trim() ||
+      !selectedImage
+    ) {
       Alert.alert('Incomplete Details', 'Please complete all fields and upload an image.');
       return;
     }
 
-    const facilityData = {
+    const newFacility = {
       facilityName,
       address,
       phoneNumber,
       description,
       imageUri: selectedImage,
+      accessCount: 0,
     };
 
     try {
       setLoading(true);
-      await AsyncStorage.setItem('facilityData', JSON.stringify(facilityData));
 
-      Alert.alert('Success', 'Facility details saved successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            resetFields(); // Clear inputs after saving
-            router.replace('/FacilityDetail');
-          },
-        },
-      ]);
+      const existingData = await AsyncStorage.getItem('allFacilities');
+      const facilityList = existingData ? JSON.parse(existingData) : [];
+
+      const updatedList = [...facilityList, newFacility];
+      await AsyncStorage.setItem('allFacilities', JSON.stringify(updatedList));
+
+      Alert.alert('Success', 'Facility details saved successfully!');
+      resetFields(); // Clear the form after saving
     } catch (error) {
       console.error('Saving Error:', error);
       Alert.alert('Error', 'Unable to save facility details. Please try again.');
@@ -87,7 +97,15 @@ const EnterFacilityDetails = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: backgroundColor, padding: 16 }}>
-      <ThemedText style={{ color: textColor, fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' }}>
+      <ThemedText
+        style={{
+          color: textColor,
+          fontSize: 24,
+          fontWeight: 'bold',
+          marginBottom: 24,
+          textAlign: 'center',
+        }}
+      >
         Enter Facility Details
       </ThemedText>
 
@@ -160,7 +178,10 @@ const EnterFacilityDetails = () => {
           }}
         >
           {selectedImage ? (
-            <Image source={{ uri: selectedImage }} style={{ width: 160, height: 160, borderRadius: 16 }} />
+            <Image
+              source={{ uri: selectedImage }}
+              style={{ width: 160, height: 160, borderRadius: 16 }}
+            />
           ) : (
             <Text style={{ color: colors.text }}>Upload Facility Image</Text>
           )}
@@ -180,7 +201,7 @@ const EnterFacilityDetails = () => {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save and refresh</Text>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save and Refresh</Text>
         )}
       </TouchableOpacity>
     </View>

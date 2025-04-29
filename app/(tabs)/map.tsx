@@ -1,4 +1,3 @@
-// MapScreen.tsx
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -7,24 +6,12 @@ import { ThemedView } from '@/components/ThemedView';
 import BackButton from '@/navigation/BackButton';
 
 export default function MapScreen() {
-  const facilities = [
-    // 'Betty Ford Center California',
-    // 'Hazelden Betty Ford Minnesota',
-    // 'Promises Treatment Center Malibu',
-    // 'The Ranch Tennessee',
-    // 'Passages Malibu California',
-	'Nairobi',
-	'university of nairobi',
-  ];
+  const { address } = useLocalSearchParams();
 
-  // Replace spaces with + inside each facility, then join all with +
-  const searchQuery = facilities
-    .map(name => name.trim().replace(/\s+/g, '+'))
-    .join('+');
+  const location = typeof address === 'string' ? address : 'Nairobi'; // default fallback
+  const searchQuery = location.trim().replace(/\s+/g, '+');
 
-
-
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${query}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
+  const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
 
   return (
     <View style={styles.container}>

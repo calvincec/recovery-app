@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,20 +35,17 @@ export default function FacilitiesScreen() {
 
   const loadFacilities = async () => {
     try {
-      const storedData = await AsyncStorage.getItem('facilityData');
+      const storedData = await AsyncStorage.getItem('allFacilities'); // expects array
       if (storedData) {
-        const facility = JSON.parse(storedData);
+        const facilityList: Facility[] = JSON.parse(storedData);
 
-        const facilityWithAccess = {
-          ...facility,
-          accessCount: 0,
-        };
-
-        const facilitiesList = [facilityWithAccess];
-
-        const sortedFacilities = facilitiesList.sort((a, b) =>
-          a.facilityName.localeCompare(b.facilityName)
-        );
+        // Sort by accessCount (descending) first, then alphabetically
+        const sortedFacilities = facilityList.sort((a, b) => {
+          if (b.accessCount !== a.accessCount) {
+            return b.accessCount - a.accessCount;
+          }
+          return a.facilityName.localeCompare(b.facilityName);
+        });
 
         setFacilities(sortedFacilities);
         setFilteredFacilities(sortedFacilities);
@@ -52,33 +57,59 @@ export default function FacilitiesScreen() {
     }
   };
 
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
     setSearchQuery(query);
 
     const filtered = facilities.filter((facility) =>
       facility.facilityName.toLowerCase().includes(query.toLowerCase())
     );
-
     setFilteredFacilities(filtered);
+
+    // Redirect if exactly one match found
+    if (filtered.length === 1) {
+      const matchedFacility = filtered[0];
+
+      try {
+        const updatedFacilities = facilities.map((f) =>
+          f.facilityName === matchedFacility.facilityName
+            ? { ...f, accessCount: f.accessCount + 1 }
+            : f
+        );
+
+        await AsyncStorage.setItem('allFacilities', JSON.stringify(updatedFacilities));
+
+        router.push({
+          pathname: '/FacilityDetail',
+          params: { ...matchedFacility },
+        });
+      } catch (error) {
+        console.error('Error updating access count:', error);
+      }
+    }
   };
 
-  const recommendedFacilities = [...facilities]
-    .sort((a, b) => b.accessCount - a.accessCount)
-    .slice(0, 3);
+  const handleFacilityPress = async (facility: Facility) => {
+    try {
+      // Increment accessCount
+      const updatedFacilities = facilities.map((f) =>
+        f.facilityName === facility.facilityName
+          ? { ...f, accessCount: f.accessCount + 1 }
+          : f
+      );
 
-  const handleFacilityPress = (facility: Facility) => {
-    // Navigate and pass facility details to the FacilityDetail screen
-    router.push({
-      pathname: '/FacilityDetail', // Adjusted path correctly
-      params: {
-        name: facility.facilityName,
-        address: facility.address,
-        phoneNumber: facility.phoneNumber,
-        description: facility.description,
-        image: facility.imageUri,
-      },
-    });
+      await AsyncStorage.setItem('allFacilities', JSON.stringify(updatedFacilities));
+
+      // Navigate to FacilityDetail screen with details
+      router.push({
+        pathname: '/FacilityDetail',
+        params: { ...facility },
+      });
+    } catch (error) {
+      console.error('Error updating access count:', error);
+    }
   };
+
+  const recommendedFacilities = facilities.slice(0, 3); // top 3 by access count
 
   if (loading) {
     return (
@@ -92,19 +123,20 @@ export default function FacilitiesScreen() {
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>Recommended Facilities</Text>
 
-      {/* Recommended Facilities */}
       {recommendedFacilities.map((facility, index) => (
         <TouchableOpacity
           key={`recommended-${index}`}
           style={styles.facilityButton}
           onPress={() => handleFacilityPress(facility)}
         >
-          <Text style={styles.facilityText}>{facility.facilityName}</Text>
+          <View>
+            <Text style={styles.facilityText}>{facility.facilityName}</Text>
+            <Text style={styles.addressText}>{facility.address}</Text>
+          </View>
           <Ionicons name="star" size={20} color="gold" />
         </TouchableOpacity>
       ))}
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="gray" style={{ marginRight: 8 }} />
         <TextInput
@@ -117,14 +149,16 @@ export default function FacilitiesScreen() {
 
       <Text style={styles.heading}>All Facilities</Text>
 
-      {/* All Facilities List */}
       {filteredFacilities.map((facility, index) => (
         <TouchableOpacity
-          key={index}
+          key={`all-${index}`}
           style={styles.facilityButton}
           onPress={() => handleFacilityPress(facility)}
         >
-          <Text style={styles.facilityText}>{facility.facilityName}</Text>
+          <View>
+            <Text style={styles.facilityText}>{facility.facilityName}</Text>
+            <Text style={styles.addressText}>{facility.address}</Text>
+          </View>
           <Ionicons name="arrow-forward" size={20} color="black" />
         </TouchableOpacity>
       ))}
@@ -160,6 +194,11 @@ const styles = StyleSheet.create({
   facilityText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  addressText: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 4,
   },
   searchContainer: {
     flexDirection: 'row',
