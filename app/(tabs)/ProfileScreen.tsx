@@ -1,6 +1,6 @@
 // app/screens/ProfileScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -11,15 +11,17 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const storedUserData = await AsyncStorage.getItem('userData');
-        if (storedUserData) {
-          const parsedUser = JSON.parse(storedUserData);
-          setUser({
-            name: parsedUser.name,
-            email: parsedUser.email,
-            streak: parsedUser.streak || 0, // Default 0 if not stored
-            profileImage: 'https://via.placeholder.com/150', // Placeholder image
-          });
+		// fetch data from currentUser in AsyncStorage
+		const currentUser = await AsyncStorage.getItem('currentUser');
+		if (currentUser) {
+			const parsedUser = JSON.parse(currentUser);
+			setUser({
+				name: parsedUser.name,
+				email: parsedUser.email,
+				streak: parsedUser.streak || 0, // Default 0 if not stored
+				profileImage: 'https://via.placeholder.com/150', // Placeholder image
+			});
+
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -31,28 +33,12 @@ const ProfileScreen = () => {
 
   
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { 
-        text: 'Logout',
-        onPress: async () => {
-          try {
-            await AsyncStorage.removeItem('userData'); // clear user data
-  
-            // Navigate immediately
-            router.replace('/UserAuthScreen'); 
-  
-            // (Optional) If you still want a small "toast" or "flash" message,
-            // we can add a Toast later separately (like Expo Toast or react-native-toast-message)
-  
-          } catch (error) {
-            console.error('Logout Error:', error);
-            Alert.alert('Error', 'Something went wrong while logging out.');
-          }
-        }
-      },
-    ]);
+  const handleLogout = async () => {
+	//logout someone without using the alert
+	await AsyncStorage.removeItem('currentUser'); // remove current user data
+	router.replace('/UserAuthScreen'); // navigate to UserAuthScreen
+
+
   };
   
   
@@ -113,3 +99,17 @@ const ProfileScreen = () => {
 };
 
 export default ProfileScreen;
+
+const styles = StyleSheet.create({
+	message: {
+		textAlign: 'center',
+		marginTop: 10,
+		fontSize: 16,
+	  },
+	  errorText: {
+		color: 'red',
+	  },
+	  successText: {
+		color: 'green',
+	  },
+});
