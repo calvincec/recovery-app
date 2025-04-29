@@ -8,66 +8,98 @@ export default function UserAuthScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');  // <-- New state for feedback message
+  const [messageType, setMessageType] = useState(''); 
+
   const router = useRouter();
 
-  // ✅ Check if already logged in
-  useEffect(() => {
-    const checkIfLoggedIn = async () => {
-      try {
-        const storedUserData = await AsyncStorage.getItem('userData');
-        if (storedUserData) {
-          const parsedUser = JSON.parse(storedUserData);
-          if (parsedUser.email && parsedUser.password) {
-            router.replace('/HomeScreen'); // Already logged in, go to Home
-          }
-        }
-      } catch (err) {
-        console.error('Error checking login status:', err);
-      }
-    };
-
-    checkIfLoggedIn();
-  }, []);
-
-  const handleCreateAccount = async () => {
-    if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill all fields');
-      return;
-    }
-
-    try {
-      await AsyncStorage.setItem('userData', JSON.stringify({ name, email, password, streak: 0 }));
-      Alert.alert('Success', 'Account created successfully!');
-      router.replace('/HomeScreen');
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Something went wrong during account creation');
-    }
+  const saveUserData = async (newUser) => {
+	try {
+	  const existingData = await AsyncStorage.getItem('userData');
+	  let updatedData = [];
+  
+	  if (existingData !== null) {
+		updatedData = JSON.parse(existingData);
+		if (!Array.isArray(updatedData)) {
+		  updatedData = [updatedData];
+		}
+	  }
+  
+	  updatedData.push(newUser);
+	  await AsyncStorage.setItem('userData', JSON.stringify(updatedData));
+	} catch (error) {
+	  console.error('Error saving user data:', error);
+	  throw error; // rethrow so handleCreateAccount can catch it
+	}
   };
+  
+  // Function to handle account creation
+  const handleCreateAccount = async () => {
+	if (!name || !email || !password) {
+		setMessage('Please fill in all fields.');
+    	setMessageType('error');
+	  	// Alert.alert('Error', 'Please fill all fields');
+	  	return;
+	}
+  
+	const newUser = { name, email, password };
+  
+	try {
+	  await saveUserData(newUser);
+	  setMessage('Account created successfully!');
+	  setMessageType('success');
+	//   Alert.alert('Success', 'Account created successfully!');
+	  router.replace('/HomeScreen');
+	} catch (error) {
+	  Alert.alert('Error', 'Something went wrong during account creation');
+	}
+  };
+
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill all fields');
+		setMessage('Please fill in all fields.');
+    	setMessageType('error');
+    //   Alert.alert('Error', 'Please fill all fields');
       return;
     }
 
     try {
       const storedData = await AsyncStorage.getItem('userData');
       if (!storedData) {
-        Alert.alert('Error', 'No account found. Please create an account first.');
+		setMessage('No account found. Please create an account first.');
+    	setMessageType('error');
+        // Alert.alert('Error', 'No account found. Please create an account first.');
         return;
       }
+  
+	  const strvalues = storedData;
+	  const arrvalues = JSON.parse(strvalues);
+      const { email: storedEmail, password: storedPassword } = arrvalues;
 
-      const { email: storedEmail, password: storedPassword } = JSON.parse(storedData);
+	  
+	  for (let i = 0; i < arrvalues.length; i++) {
+		if (arrvalues[i].email === email && arrvalues[i].password === password) {
+			setMessage('Logged in successfully!');
+			setMessageType('success');
 
-      if (email.trim() === storedEmail && password === storedPassword) {
-        Alert.alert('Success', 'Logged in successfully!');
-        router.replace('/HomeScreen');
-      } else {
-        Alert.alert('Incorrect Login', 'Incorrect email or password. Please try again.');
-      }
+			// Alert.alert('Success', 'Logged in successfully!');
+			router.replace('/HomeScreen');
+			return;
+		}
+		if(i === arrvalues.length - 1) {
+			setMessage('Incorrect email or password. Please try again.');
+			setMessageType('error');
+			
+			
+			// Alert.alert('Incorrect Login', 'Incorrect email or password. Please try again.');
+		}
+	  }
+	  
+  
+
     } catch (error) {
-      console.error(error);
+      console.log("Error:", error);
       Alert.alert('Error', 'Something went wrong during login');
     }
   };
@@ -98,26 +130,48 @@ export default function UserAuthScreen() {
             value={name}
             onChangeText={setName}
           />
-        )}
-        <TextInput
-          placeholder="Email"
-          style={styles.input}
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          placeholder="Password"
-          style={styles.input}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <Button
-          title={isCreatingAccount ? 'Create Account' : 'Login'}
-          onPress={isCreatingAccount ? handleCreateAccount : handleLogin}
-        />
-      </View>
+          <TextInput 
+            placeholder="Email" 
+            style={styles.input} 
+            keyboardType="email-address" 
+            value={email} 
+            onChangeText={setEmail} 
+          />
+          <TextInput 
+            placeholder="Password" 
+            style={styles.input} 
+            secureTextEntry 
+            value={password} 
+            onChangeText={setPassword} 
+          />
+          <Button title="Create Account" onPress={handleCreateAccount} />
+        </View>
+      ) : (
+        <View style={styles.formContainer}>
+          <TextInput 
+            placeholder="Email" 
+            style={styles.input} 
+            keyboardType="email-address" 
+            value={email} 
+            onChangeText={setEmail} 
+          />
+          <TextInput 
+            placeholder="Password" 
+            style={styles.input} 
+            secureTextEntry 
+            value={password} 
+            onChangeText={setPassword} 
+          />
+          <Button title="Login" onPress={handleLogin} />
+        </View>
+      )}
+
+		{/* Display feedback message */}
+		{message !== '' && (
+			<Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
+			{message}
+			</Text>
+		)}
     </View>
   );
 }
@@ -167,5 +221,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 10,
+  },
+  message: {
+    textAlign: 'center',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+  },
+  successText: {
+    color: 'green',
   },
 });
