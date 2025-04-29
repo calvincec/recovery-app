@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'; 
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,28 +8,28 @@ export default function FacilityAuthScreen() {
   const [facilityName, setFacilityName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');  // <-- New state for feedback message
-  const [messageType, setMessageType] = useState(''); // success or error
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
   const router = useRouter();
 
   const saveFacilityData = async (newFacility) => {
-	try {
-	  const existingData = await AsyncStorage.getItem('facilityData');
-	  let updatedData = [];
+    try {
+      const existingData = await AsyncStorage.getItem('facilityData');
+      let updatedData = [];
 
-	  if (existingData !== null) {
-		updatedData = JSON.parse(existingData);
-		if (!Array.isArray(updatedData)) {
-		  updatedData = [updatedData];
-		}
-	  }
+      if (existingData !== null) {
+        updatedData = JSON.parse(existingData);
+        if (!Array.isArray(updatedData)) {
+          updatedData = [updatedData];
+        }
+      }
 
-	  updatedData.push(newFacility);
-	  await AsyncStorage.setItem('facilityData', JSON.stringify(updatedData));
-	} catch (error) {
-	  console.error('Error saving facility data:', error);
-	  throw error; // rethrow so handleCreateAccount can catch it
-	}
+      updatedData.push(newFacility);
+      await AsyncStorage.setItem('facilityData', JSON.stringify(updatedData));
+    } catch (error) {
+      console.error('Error saving facility data:', error);
+      throw error;
+    }
   };
 
   const handleCreateAccount = async () => {
@@ -39,29 +39,26 @@ export default function FacilityAuthScreen() {
       return;
     }
 
+    const storedData = await AsyncStorage.getItem('facilityData');
+    if (storedData) {
+      const arrvalues = JSON.parse(storedData);
+      for (let i = 0; i < arrvalues.length; i++) {
+        if (arrvalues[i].email === email) {
+          setMessage('Email already exists. Please use a different email.');
+          setMessageType('error');
+          return;
+        }
+      }
+    }
 
-	const storedData = await AsyncStorage.getItem('facilityData');
-	if (storedData) {
-		const arrvalues = JSON.parse(storedData);
-		for (let i = 0; i < arrvalues.length; i++) {
-			if (arrvalues[i].email === email) {
-				setMessage('Email already exists. Please use a different email.');
-				setMessageType('error');
-				return;
-			}
-		}
-	}
-
-	let facilityDetails = '';
-
-    const facilityData = { facilityName, email, password, facilityDetails};
+    let facilityDetails = '';
+    const facilityData = { facilityName, email, password, facilityDetails };
 
     try {
       await saveFacilityData(facilityData);
       setMessage('Facility account created successfully!');
       setMessageType('success');
-
-	  await AsyncStorage.setItem('currentFacility', JSON.stringify(facilityData)); // Save facility data to AsyncStorage
+      await AsyncStorage.setItem('currentFacility', JSON.stringify(facilityData));
       router.replace('/EnterFacilityDetails');
     } catch (error) {
       console.log(error);
@@ -79,23 +76,25 @@ export default function FacilityAuthScreen() {
 
     try {
       const storedData = await AsyncStorage.getItem('facilityData');
-
       if (!storedData) {
         setMessage('No facility account found. Please create one first.');
         setMessageType('error');
         return;
       }
 
-      const { email: storedEmail, password: storedPassword } = JSON.parse(storedData);
-
-      if (email.trim() === storedEmail && password === storedPassword) {
-        setMessage('Logged in successfully!');
-        setMessageType('success');
-        router.replace('/EnterFacilityDetails');
-      } else {
-        setMessage('Email or password is wrong. Please try again.');
-        setMessageType('error');
+      const arrvalues = JSON.parse(storedData);
+      for (let i = 0; i < arrvalues.length; i++) {
+        if (arrvalues[i].email === email && arrvalues[i].password === password) {
+          setMessage('Logged in successfully!');
+          setMessageType('success');
+          await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
+          router.replace('/EnterFacilityDetails');
+          return;
+        }
       }
+
+      setMessage('Email or password is wrong. Please try again.');
+      setMessageType('error');
     } catch (error) {
       console.error(error);
       setMessage('Something went wrong during login.');
@@ -173,7 +172,6 @@ export default function FacilityAuthScreen() {
         </View>
       )}
 
-      {/* Display feedback message */}
       {message !== '' && (
         <Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
           {message}
@@ -189,7 +187,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingTop: 100,
-    backgroundColor: '#fff',
+    backgroundColor: '#33ab93', // Updated background color
   },
   title: {
     fontSize: 28,
@@ -209,7 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#428a50f',
   },
   activeText: {
     color: '#fff',
@@ -229,6 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 10,
+    backgroundColor: '#5c7872',
   },
   message: {
     textAlign: 'center',

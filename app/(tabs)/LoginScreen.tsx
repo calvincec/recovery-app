@@ -1,7 +1,17 @@
-// app/screens/LoginScreen.tsx
-import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  Dimensions,
+  StatusBar,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const backgroundImage = require('../auths/login.png'); // Ensure this file is placed in assets folder
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -16,39 +26,83 @@ export default function LoginScreen() {
       }
     } catch (error) {
       console.error('Error saving account type:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      alert('Something went wrong. Please try again.');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Select Account Type</Text>
+    <ImageBackground
+      source={backgroundImage}
+      resizeMode="cover"
+      style={styles.background}
+    >
+      <StatusBar barStyle="light-content" />
 
-      <View style={styles.buttonContainer}>
-        <Button title="User" onPress={() => handleSelectAccount('User')} />
-      </View>
+      <View style={styles.overlay}>
+        <Text style={styles.title}>Choose Your Account Type</Text>
 
-      <View style={styles.buttonContainer}>
-        <Button title="Facility" onPress={() => handleSelectAccount('Facility')} />
+        <TouchableOpacity
+          style={[styles.button, styles.userButton]}
+          onPress={() => handleSelectAccount('User')}
+        >
+          <Text style={styles.buttonText}>User</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.facilityButton]}
+          onPress={() => handleSelectAccount('Facility')}
+        >
+          <Text style={styles.buttonText}>Facility</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  overlay: {
+    width: '85%',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: 20,
+    paddingVertical: 40,
     paddingHorizontal: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
-    alignSelf: 'center',
-    marginBottom: 32,
+    color: '#333',
+    marginBottom: 30,
+    textAlign: 'center',
   },
-  buttonContainer: {
+  button: {
+    width: '100%',
+    paddingVertical: 15,
+    borderRadius: 10,
     marginVertical: 10,
+    alignItems: 'center',
+  },
+  userButton: {
+    backgroundColor: '#344d3f',
+  },
+  facilityButton: {
+    backgroundColor: '#35328a',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });

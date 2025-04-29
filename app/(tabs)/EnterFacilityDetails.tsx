@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import {
   View,
   Text,
@@ -23,7 +23,6 @@ const EnterFacilityDetails = () => {
 
   const { colors } = useTheme();
   const textColor = colors.text;
-  const backgroundColor = colors.background;
 
   const handlePickImage = async () => {
     try {
@@ -96,7 +95,7 @@ const EnterFacilityDetails = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: backgroundColor, padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: '#6e3b37', padding: 16 }}>
       <ThemedText
         style={{
           color: textColor,
@@ -111,57 +110,65 @@ const EnterFacilityDetails = () => {
 
       <TextInput
         placeholder="Facility Name"
+        placeholderTextColor="#ccc"
         value={facilityName}
         onChangeText={setFacilityName}
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
       <TextInput
         placeholder="Address"
+        placeholderTextColor="#ccc"
         value={address}
         onChangeText={setAddress}
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
       <TextInput
         placeholder="Phone Number"
+        placeholderTextColor="#ccc"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
       <TextInput
         placeholder="Short Description"
+        placeholderTextColor="#ccc"
         value={description}
         onChangeText={setDescription}
         multiline
         numberOfLines={4}
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
 
@@ -173,8 +180,9 @@ const EnterFacilityDetails = () => {
             padding: 24,
             borderRadius: 16,
             borderWidth: 2,
-            borderColor: colors.border,
+            borderColor: '#ccc',
             marginBottom: 24,
+            backgroundColor: '#fff',
           }}
         >
           {selectedImage ? (
@@ -183,7 +191,7 @@ const EnterFacilityDetails = () => {
               style={{ width: 160, height: 160, borderRadius: 16 }}
             />
           ) : (
-            <Text style={{ color: colors.text }}>Upload Facility Image</Text>
+            <Text style={{ color: '#666' }}>Upload Facility Image</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -195,7 +203,7 @@ const EnterFacilityDetails = () => {
           padding: 16,
           borderRadius: 16,
           alignItems: 'center',
-          backgroundColor: loading ? colors.disabled : colors.primary,
+          backgroundColor: loading ? '#aaa' : '#2196f3',
         }}
       >
         {loading ? (

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'; 
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -8,180 +8,154 @@ export default function UserAuthScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');  // <-- New state for feedback message
-  const [messageType, setMessageType] = useState(''); 
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
 
   const router = useRouter();
 
   const saveUserData = async (newUser) => {
-	try {
-	  const existingData = await AsyncStorage.getItem('userData');
-	  let updatedData = [];
-  
-	  if (existingData !== null) {
-		updatedData = JSON.parse(existingData);
-		if (!Array.isArray(updatedData)) {
-		  updatedData = [updatedData];
-		}
-	  }
-  
-	  updatedData.push(newUser);
-	  await AsyncStorage.setItem('userData', JSON.stringify(updatedData));
-	} catch (error) {
-	  console.error('Error saving user data:', error);
-	  throw error; // rethrow so handleCreateAccount can catch it
-	}
+    try {
+      const existingData = await AsyncStorage.getItem('userData');
+      let updatedData = [];
+
+      if (existingData !== null) {
+        updatedData = JSON.parse(existingData);
+        if (!Array.isArray(updatedData)) {
+          updatedData = [updatedData];
+        }
+      }
+
+      updatedData.push(newUser);
+      await AsyncStorage.setItem('userData', JSON.stringify(updatedData));
+    } catch (error) {
+      console.error('Error saving user data:', error);
+      throw error;
+    }
   };
-  
-  // Function to handle account creation
+
   const handleCreateAccount = async () => {
-	if (!name || !email || !password) {
-		setMessage('Please fill in all fields.');
-    	setMessageType('error');
-	  	// Alert.alert('Error', 'Please fill all fields');
-	  	return;
-	}
-  
-	const newUser = { name, email, password };
+    if (!name || !email || !password) {
+      setMessage('Please fill in all fields.');
+      setMessageType('error');
+      return;
+    }
 
-	const storedData = await AsyncStorage.getItem('userData');
-	if (storedData) {
-		const arrvalues = JSON.parse(storedData);
-		for (let i = 0; i < arrvalues.length; i++) {
-			if (arrvalues[i].email === email) {
-				setMessage('Email already exists. Please use a different email.');
-				setMessageType('error');
-				return;
-			}
-		}
-	}
-  
-	try {
-	  await saveUserData(newUser);
-	  setMessage('Account created successfully!');
-	  setMessageType('success');
-	  //save the current user on local storage
-	  await AsyncStorage.setItem('currentUser', JSON.stringify(newUser));
-	//   Alert.alert('Success', 'Account created successfully!');
-	  router.replace('/HomeScreen');
-	} catch (error) {
-	  Alert.alert('Error', 'Something went wrong during account creation');
-	}
+    const newUser = { name, email, password };
+
+    const storedData = await AsyncStorage.getItem('userData');
+    if (storedData) {
+      const arrvalues = JSON.parse(storedData);
+      for (let i = 0; i < arrvalues.length; i++) {
+        if (arrvalues[i].email === email) {
+          setMessage('Email already exists. Please use a different email.');
+          setMessageType('error');
+          return;
+        }
+      }
+    }
+
+    try {
+      await saveUserData(newUser);
+      setMessage('Account created successfully!');
+      setMessageType('success');
+      await AsyncStorage.setItem('currentUser', JSON.stringify(newUser));
+      router.replace('/HomeScreen');
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong during account creation');
+    }
   };
-
 
   const handleLogin = async () => {
     if (!email || !password) {
-		setMessage('Please fill in all fields.');
-    	setMessageType('error');
-    //   Alert.alert('Error', 'Please fill all fields');
+      setMessage('Please fill in all fields.');
+      setMessageType('error');
       return;
     }
-  
+
     try {
       const storedData = await AsyncStorage.getItem('userData');
       if (!storedData) {
-		setMessage('No account found. Please create an account first.');
-    	setMessageType('error');
-        // Alert.alert('Error', 'No account found. Please create an account first.');
+        setMessage('No account found. Please create an account first.');
+        setMessageType('error');
         return;
       }
-  
-	  const strvalues = storedData;
-	  const arrvalues = JSON.parse(strvalues);
-    //   const { email: storedEmail, password: storedPassword } = arrvalues;
 
-	  
-	  for (let i = 0; i < arrvalues.length; i++) {
-		if (arrvalues[i].email === email && arrvalues[i].password === password) {
-			setMessage('Logged in successfully!');
-			setMessageType('success');
-			//save the current user on local storage
-			await AsyncStorage.setItem('currentUser', JSON.stringify(arrvalues[i]));
-
-			// Alert.alert('Success', 'Logged in successfully!');
-			router.replace('/HomeScreen');
-			return;
-		}
-		if(i === arrvalues.length - 1) {
-			setMessage('Incorrect email or password. Please try again.');
-			setMessageType('error');
-		}
-	  }
-	  
-  
-
+      const arrvalues = JSON.parse(storedData);
+      for (let i = 0; i < arrvalues.length; i++) {
+        if (arrvalues[i].email === email && arrvalues[i].password === password) {
+          setMessage('Logged in successfully!');
+          setMessageType('success');
+          await AsyncStorage.setItem('currentUser', JSON.stringify(arrvalues[i]));
+          router.replace('/HomeScreen');
+          return;
+        }
+        if (i === arrvalues.length - 1) {
+          setMessage('Incorrect email or password. Please try again.');
+          setMessageType('error');
+        }
+      }
     } catch (error) {
       console.log("Error:", error);
       Alert.alert('Error', 'Something went wrong during login');
     }
   };
-  
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{isCreatingAccount ? 'Create Account' : 'Login'}</Text>
 
       <View style={styles.toggleContainer}>
-        <TouchableOpacity onPress={() => setIsCreatingAccount(true)} style={[styles.toggleButton, isCreatingAccount && styles.activeButton]}>
+        <TouchableOpacity
+          onPress={() => setIsCreatingAccount(true)}
+          style={[styles.toggleButton, isCreatingAccount && styles.activeButton]}>
           <Text style={isCreatingAccount ? styles.activeText : styles.inactiveText}>Create Account</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setIsCreatingAccount(false)} style={[styles.toggleButton, !isCreatingAccount && styles.activeButton]}>
+        <TouchableOpacity
+          onPress={() => setIsCreatingAccount(false)}
+          style={[styles.toggleButton, !isCreatingAccount && styles.activeButton]}>
           <Text style={!isCreatingAccount ? styles.activeText : styles.inactiveText}>Login</Text>
         </TouchableOpacity>
       </View>
 
-      {isCreatingAccount ? (
-        <View style={styles.formContainer}>
-          <TextInput 
-            placeholder="Name" 
-            style={styles.input} 
-            value={name} 
-            onChangeText={setName} 
+      <View style={styles.formContainer}>
+        {isCreatingAccount && (
+          <TextInput
+            placeholder="Name"
+            placeholderTextColor="#ccc"
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
           />
-          <TextInput 
-            placeholder="Email" 
-            style={styles.input} 
-            keyboardType="email-address" 
-            value={email} 
-            onChangeText={setEmail} 
-          />
-          <TextInput 
-            placeholder="Password" 
-            style={styles.input} 
-            secureTextEntry 
-            value={password} 
-            onChangeText={setPassword} 
-          />
-          <Button title="Create Account" onPress={handleCreateAccount} />
-        </View>
-      ) : (
-        <View style={styles.formContainer}>
-          <TextInput 
-            placeholder="Email" 
-            style={styles.input} 
-            keyboardType="email-address" 
-            value={email} 
-            onChangeText={setEmail} 
-          />
-          <TextInput 
-            placeholder="Password" 
-            style={styles.input} 
-            secureTextEntry 
-            value={password} 
-            onChangeText={setPassword} 
-          />
-          <Button title="Login" onPress={handleLogin} />
-        </View>
-      )}
+        )}
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#ccc"
+          style={styles.input}
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#ccc"
+          style={styles.input}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <Button
+          title={isCreatingAccount ? 'Create Account' : 'Login'}
+          onPress={isCreatingAccount ? handleCreateAccount : handleLogin}
+          color="#ffffff"
+        />
+      </View>
 
-		{/* Display feedback message */}
-		{message !== '' && (
-			<Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
-			{message}
-			</Text>
-		)}
+      {message !== '' && (
+        <Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
+          {message}
+        </Text>
+      )}
     </View>
   );
 }
@@ -192,11 +166,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingTop: 100,
-    backgroundColor: '#fff',
+    backgroundColor: '#440961',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
+    color: 'white',
     alignSelf: 'center',
     marginBottom: 20,
   },
@@ -212,14 +187,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#6f2da8',
   },
   activeText: {
     color: '#fff',
     fontWeight: 'bold',
   },
   inactiveText: {
-    color: '#007bff',
+    color: '#bbb',
   },
   formContainer: {
     gap: 12,
@@ -230,6 +205,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
+    color: 'white',
+    backgroundColor: '#5a2d91',
     marginBottom: 10,
   },
   message: {
@@ -238,9 +215,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   errorText: {
-    color: 'red',
+    color: '#ff4d4d',
   },
   successText: {
-    color: 'green',
+    color: '#00ff99',
   },
 });
