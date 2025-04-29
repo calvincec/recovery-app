@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator, Button } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator, Button, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -15,6 +15,9 @@ const EnterFacilityDetails = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [message, setMessage] = useState(''); 
+  const [messageType, setMessageType] = useState('');
+
   const router = useRouter();
   const { colors } = useTheme();
   const textColor = colors.text;
@@ -24,7 +27,8 @@ const EnterFacilityDetails = () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Gallery access is needed to upload an image.');
+		setMessage('Permission Required, Gallery access is needed to upload an image.');
+      	setMessageType('error');
         return;
       }
 
@@ -37,7 +41,7 @@ const EnterFacilityDetails = () => {
         setSelectedImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error('Image Picker Error:', error);
+      console.log('Image Picker Error:', error);
       Alert.alert('Error', 'Something went wrong while selecting an image.');
     }
   };
@@ -51,8 +55,10 @@ const EnterFacilityDetails = () => {
   };
 
   const handleSubmit = async () => {
-    if (!facilityName.trim() || !address.trim() || !phoneNumber.trim() || !description.trim() || !selectedImage) {
-      Alert.alert('Incomplete Details', 'Please complete all fields and upload an image.');
+    if (!facilityName || !address || !phoneNumber || !description || !selectedImage) {
+		// console.log("Incomplete details", facilityName, address, phoneNumber, description, selectedImage);
+		setMessage('Incomplete Details Please complete all fields and upload an image.');
+      	setMessageType('error');
       return;
     }
 
@@ -66,20 +72,43 @@ const EnterFacilityDetails = () => {
 
     try {
       setLoading(true);
-      await AsyncStorage.setItem('facilityData', JSON.stringify(facilityData));
+	//   set facilityDetails in currentfacility
+	  const currentFacility = await AsyncStorage.getItem('currentFacility');
+	  if (currentFacility) {
+		const parsedFacility = JSON.parse(currentFacility);
+		parsedFacility.facilityDetails = facilityData;
+		await AsyncStorage.setItem('currentFacility', JSON.stringify(parsedFacility));
 
-      Alert.alert('Success', 'Facility details saved successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            resetFields(); // Clear inputs after saving
-            router.replace('/FacilityDetail');
-          },
-        },
-      ]);
+
+		const existingData = await AsyncStorage.getItem('facilityData');
+		let updatedData = [];
+
+		if (existingData !== null) {
+		  updatedData = JSON.parse(existingData);
+		  if (!Array.isArray(updatedData)) {
+			updatedData = [updatedData];
+		  }
+
+		for (let i = 0; i < updatedData.length; i++) {
+			if (updatedData[i].facilityName === parsedFacility.facilityName && updatedData[i].email === parsedFacility.email) {
+				updatedData[i] = parsedFacility; // Update the existing entry
+				await AsyncStorage.setItem('facilityData', JSON.stringify(updatedData));
+				resetFields();
+				setMessage('Successfully entered the details');
+      			setMessageType('success');
+				router.replace('/(tabs)/FacilityDetail')
+
+				
+				return;
+			}
+		}
+
+	  	}
+		}
+
+
     } catch (error) {
-      console.error('Saving Error:', error);
-      Alert.alert('Error', 'Unable to save facility details. Please try again.');
+      console.log('Saving Error:', error);
     } finally {
       setLoading(false);
     }
@@ -180,11 +209,33 @@ const EnterFacilityDetails = () => {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save and refresh</Text>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save and proceed</Text>
         )}
       </TouchableOpacity>
+
+	  {/* Display feedback message */}
+			{message !== '' && (
+			  <Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
+				{message}
+			  </Text>
+			)}
     </View>
   );
 };
 
 export default EnterFacilityDetails;
+
+
+const styles = StyleSheet.create({
+	message: {
+		textAlign: 'center',
+		marginTop: 10,
+		fontSize: 16,
+	  },
+	  errorText: {
+		color: 'red',
+	  },
+	  successText: {
+		color: 'green',
+	  },
+});

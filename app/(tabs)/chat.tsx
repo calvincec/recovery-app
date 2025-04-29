@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import BackButton from '@/navigation/BackButton';
 import { useRouter } from 'expo-router';
+import { OPENROUTER_API_KEY } from '@env';
 
 // Function to send message to OpenRouter
 const sendMessageToBot = async (input: string) => {
@@ -17,7 +18,7 @@ const sendMessageToBot = async (input: string) => {
       },
       {
         headers: {
-          'Authorization': 'Bearer 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',
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
         },
       }

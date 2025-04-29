@@ -27,12 +27,12 @@ export default function FacilityDetail() {
   useEffect(() => {
     const fetchFacilityData = async () => {
       try {
-        const storedData = await AsyncStorage.getItem('facilityData');
+        const storedData = await AsyncStorage.getItem('currentFacility');
         if (storedData) {
-          setFacilityData(JSON.parse(storedData));
+          setFacilityData(JSON.parse(storedData).facilityDetails);
         }
       } catch (error) {
-        console.error('Error fetching facility data:', error);
+        console.log('Error fetching facility data:', error);
       } finally {
         setLoading(false);
       }
@@ -42,13 +42,21 @@ export default function FacilityDetail() {
   }, []);
 
   const goToMap = () => {
-    if (facilityData?.address) {
       router.push({
-        pathname: '/MapScreen',
-        params: { address: facilityData.address },
+        pathname: '/(tabs)/map',
       });
-    }
+    
   };
+
+  const handleExit = async () => {
+	try {
+	  await AsyncStorage.removeItem('currentFacility'); // Clear the stored facility
+	  router.replace('/LoginScreen'); // Navigate to home
+	} catch (error) {
+	  console.log('Failed to remove currentFacility:', error);
+	}
+  };
+  
 
   if (loading) {
     return (
@@ -94,6 +102,9 @@ export default function FacilityDetail() {
         <Text style={styles.label}>Description:</Text>
         <Text style={styles.text}>{facilityData.description}</Text>
       </View>
+	  <TouchableOpacity onPress={handleExit} style={styles.exitButton}>
+		<Text style={styles.exitText}>Exit</Text>
+		</TouchableOpacity>
     </ScrollView>
   );
 }
@@ -111,10 +122,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9fafb',
   },
   image: {
-    width: '100%',
-    height: 300,
+    width: 100,
+    height: 100,
     borderRadius: 20,
     marginBottom: 20,
+	alignSelf: 'center',
+	// place it at the middle
+
+
   },
   card: {
     backgroundColor: 'white',
@@ -141,5 +156,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
     marginBottom: 10,
+  },
+  exitButton: {
+	marginTop: 30,
+	backgroundColor: '#e53935',
+	paddingVertical: 12,
+	borderRadius: 8,
+	alignItems: 'center',
+  },
+  exitText: {
+	color: 'white',
+	fontSize: 16,
+	fontWeight: 'bold',
   },
 });

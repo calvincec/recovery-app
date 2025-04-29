@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface Facility {
+interface FacilityDetails {
   facilityName: string;
   address: string;
   phoneNumber: string;
   description: string;
   imageUri: string;
+}
+
+interface FacilityData {
+  facilityName: string;
+  email: string;
+  password: string;
+  facilityDetails: FacilityDetails;
+}
+
+interface FacilityWithAccess extends FacilityDetails {
   accessCount: number;
 }
 
@@ -17,8 +35,8 @@ export default function FacilitiesScreen() {
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [facilities, setFacilities] = useState<Facility[]>([]);
-  const [filteredFacilities, setFilteredFacilities] = useState<Facility[]>([]);
+  const [facilities, setFacilities] = useState<FacilityWithAccess[]>([]);
+  const [filteredFacilities, setFilteredFacilities] = useState<FacilityWithAccess[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,14 +47,12 @@ export default function FacilitiesScreen() {
     try {
       const storedData = await AsyncStorage.getItem('facilityData');
       if (storedData) {
-        const facility = JSON.parse(storedData);
+        const rawData: FacilityData[] = JSON.parse(storedData);
 
-        const facilityWithAccess = {
-          ...facility,
+        const facilitiesList: FacilityWithAccess[] = rawData.map((facility) => ({
+          ...facility.facilityDetails,
           accessCount: 0,
-        };
-
-        const facilitiesList = [facilityWithAccess];
+        }));
 
         const sortedFacilities = facilitiesList.sort((a, b) =>
           a.facilityName.localeCompare(b.facilityName)
@@ -66,18 +82,26 @@ export default function FacilitiesScreen() {
     .sort((a, b) => b.accessCount - a.accessCount)
     .slice(0, 3);
 
-  const handleFacilityPress = (facility: Facility) => {
-    // Navigate and pass facility details to the FacilityDetail screen
-    router.push({
-      pathname: '/FacilityDetail', // Adjusted path correctly
-      params: {
-        name: facility.facilityName,
-        address: facility.address,
-        phoneNumber: facility.phoneNumber,
-        description: facility.description,
-        image: facility.imageUri,
-      },
-    });
+  const handleFacilityPress = async (facility: FacilityWithAccess) => {
+    try {
+      await AsyncStorage.setItem(
+        'currentFacility',
+        JSON.stringify({ facilityDetails: facility })
+      );
+
+      router.push('/FacilityDetail');
+    } catch (error) {
+      console.error('Error storing facility:', error);
+    }
+  };
+
+  const clearCurrentFacilityAndGoHome = async () => {
+    try {
+      await AsyncStorage.removeItem('currentFacility');
+      router.replace('/HomeScreen');
+    } catch (error) {
+      console.error('Error clearing currentFacility:', error);
+    }
   };
 
   if (loading) {
@@ -92,7 +116,6 @@ export default function FacilitiesScreen() {
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>Recommended Facilities</Text>
 
-      {/* Recommended Facilities */}
       {recommendedFacilities.map((facility, index) => (
         <TouchableOpacity
           key={`recommended-${index}`}
@@ -104,7 +127,6 @@ export default function FacilitiesScreen() {
         </TouchableOpacity>
       ))}
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="gray" style={{ marginRight: 8 }} />
         <TextInput
@@ -117,7 +139,6 @@ export default function FacilitiesScreen() {
 
       <Text style={styles.heading}>All Facilities</Text>
 
-      {/* All Facilities List */}
       {filteredFacilities.map((facility, index) => (
         <TouchableOpacity
           key={index}
@@ -128,6 +149,10 @@ export default function FacilitiesScreen() {
           <Ionicons name="arrow-forward" size={20} color="black" />
         </TouchableOpacity>
       ))}
+
+      <TouchableOpacity style={styles.clearButton} onPress={clearCurrentFacilityAndGoHome}>
+        <Text style={styles.clearButtonText}>Back</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -178,5 +203,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  clearButton: {
+    backgroundColor: '#ff4d4f',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  clearButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });

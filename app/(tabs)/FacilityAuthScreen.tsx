@@ -86,16 +86,26 @@ export default function FacilityAuthScreen() {
         return;
       }
 
-      const { email: storedEmail, password: storedPassword } = JSON.parse(storedData);
+	  const strvalues = storedData;
+	  const arrvalues = JSON.parse(strvalues);
 
-      if (email.trim() === storedEmail && password === storedPassword) {
-        setMessage('Logged in successfully!');
-        setMessageType('success');
-        router.replace('/EnterFacilityDetails');
-      } else {
-        setMessage('Email or password is wrong. Please try again.');
-        setMessageType('error');
-      }
+	  for (let i = 0; i < arrvalues.length; i++) {
+		if (arrvalues[i].email === email) {
+			if (arrvalues[i].password === password) {
+				setMessage('Logged in successfully!');
+				setMessageType('success');
+				//save the current user on local storage
+				await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
+				router.replace('/FacilityDetail');
+				return;
+			}
+		}
+		if (i === arrvalues.length - 1) {
+			setMessage('Email or password is wrong. Please try again.');
+			setMessageType('error');
+		}		
+	}
+
     } catch (error) {
       console.error(error);
       setMessage('Something went wrong during login.');
