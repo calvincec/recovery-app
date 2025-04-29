@@ -43,11 +43,25 @@ export default function UserAuthScreen() {
 	}
   
 	const newUser = { name, email, password };
+
+	const storedData = await AsyncStorage.getItem('userData');
+	if (storedData) {
+		const arrvalues = JSON.parse(storedData);
+		for (let i = 0; i < arrvalues.length; i++) {
+			if (arrvalues[i].email === email) {
+				setMessage('Email already exists. Please use a different email.');
+				setMessageType('error');
+				return;
+			}
+		}
+	}
   
 	try {
 	  await saveUserData(newUser);
 	  setMessage('Account created successfully!');
 	  setMessageType('success');
+	  //save the current user on local storage
+	  await AsyncStorage.setItem('currentUser', JSON.stringify(newUser));
 	//   Alert.alert('Success', 'Account created successfully!');
 	  router.replace('/HomeScreen');
 	} catch (error) {
@@ -75,13 +89,15 @@ export default function UserAuthScreen() {
   
 	  const strvalues = storedData;
 	  const arrvalues = JSON.parse(strvalues);
-      const { email: storedEmail, password: storedPassword } = arrvalues;
+    //   const { email: storedEmail, password: storedPassword } = arrvalues;
 
 	  
 	  for (let i = 0; i < arrvalues.length; i++) {
 		if (arrvalues[i].email === email && arrvalues[i].password === password) {
 			setMessage('Logged in successfully!');
 			setMessageType('success');
+			//save the current user on local storage
+			await AsyncStorage.setItem('currentUser', JSON.stringify(arrvalues[i]));
 
 			// Alert.alert('Success', 'Logged in successfully!');
 			router.replace('/HomeScreen');
@@ -90,9 +106,6 @@ export default function UserAuthScreen() {
 		if(i === arrvalues.length - 1) {
 			setMessage('Incorrect email or password. Please try again.');
 			setMessageType('error');
-			
-			
-			// Alert.alert('Incorrect Login', 'Incorrect email or password. Please try again.');
 		}
 	  }
 	  

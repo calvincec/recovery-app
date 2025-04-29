@@ -12,6 +12,26 @@ export default function FacilityAuthScreen() {
   const [messageType, setMessageType] = useState(''); // success or error
   const router = useRouter();
 
+  const saveFacilityData = async (newFacility) => {
+	try {
+	  const existingData = await AsyncStorage.getItem('facilityData');
+	  let updatedData = [];
+
+	  if (existingData !== null) {
+		updatedData = JSON.parse(existingData);
+		if (!Array.isArray(updatedData)) {
+		  updatedData = [updatedData];
+		}
+	  }
+
+	  updatedData.push(newFacility);
+	  await AsyncStorage.setItem('facilityData', JSON.stringify(updatedData));
+	} catch (error) {
+	  console.error('Error saving facility data:', error);
+	  throw error; // rethrow so handleCreateAccount can catch it
+	}
+  };
+
   const handleCreateAccount = async () => {
     if (!facilityName || !email || !password) {
       setMessage('Please fill in all fields.');
@@ -19,15 +39,32 @@ export default function FacilityAuthScreen() {
       return;
     }
 
-    const facilityData = { facilityName, email, password };
+
+	const storedData = await AsyncStorage.getItem('facilityData');
+	if (storedData) {
+		const arrvalues = JSON.parse(storedData);
+		for (let i = 0; i < arrvalues.length; i++) {
+			if (arrvalues[i].email === email) {
+				setMessage('Email already exists. Please use a different email.');
+				setMessageType('error');
+				return;
+			}
+		}
+	}
+
+	let facilityDetails = '';
+
+    const facilityData = { facilityName, email, password, facilityDetails};
 
     try {
-      await AsyncStorage.setItem('facilityData', JSON.stringify(facilityData));
+      await saveFacilityData(facilityData);
       setMessage('Facility account created successfully!');
       setMessageType('success');
+
+	  await AsyncStorage.setItem('currentFacility', JSON.stringify(facilityData)); // Save facility data to AsyncStorage
       router.replace('/EnterFacilityDetails');
     } catch (error) {
-      console.error(error);
+      console.log(error);
       setMessage('Something went wrong while creating the account.');
       setMessageType('error');
     }
