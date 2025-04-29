@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator, Button, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@react-navigation/native';
-
 
 const EnterFacilityDetails = () => {
   const [facilityName, setFacilityName] = useState('');
@@ -21,7 +19,6 @@ const EnterFacilityDetails = () => {
   const router = useRouter();
   const { colors } = useTheme();
   const textColor = colors.text;
-  const backgroundColor = colors.background;
 
   const handlePickImage = async () => {
     try {
@@ -62,12 +59,13 @@ const EnterFacilityDetails = () => {
       return;
     }
 
-    const facilityData = {
+    const newFacility = {
       facilityName,
       address,
       phoneNumber,
       description,
       imageUri: selectedImage,
+      accessCount: 0,
     };
 
     try {
@@ -115,64 +113,80 @@ const EnterFacilityDetails = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: backgroundColor, padding: 16 }}>
-      <ThemedText style={{ color: textColor, fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' }}>
+    <View style={{ flex: 1, backgroundColor: '#6e3b37', padding: 16 }}>
+      <ThemedText
+        style={{
+          color: textColor,
+          fontSize: 24,
+          fontWeight: 'bold',
+          marginBottom: 24,
+          textAlign: 'center',
+        }}
+      >
         Enter Facility Details
       </ThemedText>
 
       <TextInput
         placeholder="Facility Name"
+        placeholderTextColor="#ccc"
         value={facilityName}
         onChangeText={setFacilityName}
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
       <TextInput
         placeholder="Address"
+        placeholderTextColor="#ccc"
         value={address}
         onChangeText={setAddress}
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
       <TextInput
         placeholder="Phone Number"
+        placeholderTextColor="#ccc"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
       <TextInput
         placeholder="Short Description"
+        placeholderTextColor="#ccc"
         value={description}
         onChangeText={setDescription}
         multiline
         numberOfLines={4}
         style={{
           borderWidth: 1,
-          borderColor: colors.border,
+          borderColor: '#ccc',
           padding: 12,
           borderRadius: 12,
           marginBottom: 16,
           color: textColor,
+          backgroundColor: '#fff',
         }}
       />
 
@@ -184,14 +198,18 @@ const EnterFacilityDetails = () => {
             padding: 24,
             borderRadius: 16,
             borderWidth: 2,
-            borderColor: colors.border,
+            borderColor: '#ccc',
             marginBottom: 24,
+            backgroundColor: '#fff',
           }}
         >
           {selectedImage ? (
-            <Image source={{ uri: selectedImage }} style={{ width: 160, height: 160, borderRadius: 16 }} />
+            <Image
+              source={{ uri: selectedImage }}
+              style={{ width: 160, height: 160, borderRadius: 16 }}
+            />
           ) : (
-            <Text style={{ color: colors.text }}>Upload Facility Image</Text>
+            <Text style={{ color: '#666' }}>Upload Facility Image</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -203,7 +221,7 @@ const EnterFacilityDetails = () => {
           padding: 16,
           borderRadius: 16,
           alignItems: 'center',
-          backgroundColor: loading ? colors.disabled : colors.primary,
+          backgroundColor: loading ? '#aaa' : '#2196f3',
         }}
       >
         {loading ? (

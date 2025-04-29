@@ -122,7 +122,10 @@ export default function FacilitiesScreen() {
           style={styles.facilityButton}
           onPress={() => handleFacilityPress(facility)}
         >
-          <Text style={styles.facilityText}>{facility.facilityName}</Text>
+          <View>
+            <Text style={styles.facilityText}>{facility.facilityName}</Text>
+            <Text style={styles.addressText}>{facility.address}</Text>
+          </View>
           <Ionicons name="star" size={20} color="gold" />
         </TouchableOpacity>
       ))}
@@ -145,7 +148,10 @@ export default function FacilitiesScreen() {
           style={styles.facilityButton}
           onPress={() => handleFacilityPress(facility)}
         >
-          <Text style={styles.facilityText}>{facility.facilityName}</Text>
+          <View>
+            <Text style={styles.facilityText}>{facility.facilityName}</Text>
+            <Text style={styles.addressText}>{facility.address}</Text>
+          </View>
           <Ionicons name="arrow-forward" size={20} color="black" />
         </TouchableOpacity>
       ))}
@@ -185,6 +191,11 @@ const styles = StyleSheet.create({
   facilityText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  addressText: {
+    fontSize: 14,
+    color: 'gray',
+    marginTop: 4,
   },
   searchContainer: {
     flexDirection: 'row',
