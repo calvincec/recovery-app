@@ -8,7 +8,7 @@ export default function LaunchScreen() {
 	<View style={styles.container}>
 	  {/* Logo or App Name */}
 	  <Image
-		source={require('@/assets/images/partial-react-logo.png')} // 👈 adjust path or use text instead
+		source={require('@/assets/images/launcimg.png')}
 		style={styles.logo}
 		resizeMode="contain"
 	  />
@@ -18,7 +18,7 @@ export default function LaunchScreen() {
 	  {/* Get Started Button */}
 	  <Button
 		title="Get Started"
-		onPress={() => router.replace('/(tabs)/home')} // 👈 replace so LaunchScreen won't stay in stack
+		onPress={() => router.replace('/auths/LoginScreen')} // 👈 replace so LaunchScreen won't stay in stack
 	  />
 	</View>
   );

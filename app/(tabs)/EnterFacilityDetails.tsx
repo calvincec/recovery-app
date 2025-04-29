@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator, Button } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import { useTheme } from '@react-navigation/native';
+
 
 const EnterFacilityDetails = () => {
   const [facilityName, setFacilityName] = useState('');
@@ -13,6 +16,9 @@ const EnterFacilityDetails = () => {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const { colors } = useTheme();
+  const textColor = colors.text;
+  const backgroundColor = colors.background;
 
   const handlePickImage = async () => {
     try {
@@ -36,6 +42,14 @@ const EnterFacilityDetails = () => {
     }
   };
 
+  const resetFields = () => {
+    setFacilityName('');
+    setAddress('');
+    setPhoneNumber('');
+    setDescription('');
+    setSelectedImage(null);
+  };
+
   const handleSubmit = async () => {
     if (!facilityName.trim() || !address.trim() || !phoneNumber.trim() || !description.trim() || !selectedImage) {
       Alert.alert('Incomplete Details', 'Please complete all fields and upload an image.');
@@ -57,7 +71,10 @@ const EnterFacilityDetails = () => {
       Alert.alert('Success', 'Facility details saved successfully!', [
         {
           text: 'OK',
-          onPress: () => router.replace('/FacilityDetailScreen'),
+          onPress: () => {
+            resetFields(); // Clear inputs after saving
+            router.replace('/FacilityDetail');
+          },
         },
       ]);
     } catch (error) {
@@ -69,27 +86,50 @@ const EnterFacilityDetails = () => {
   };
 
   return (
-    <View className="flex-1 bg-white p-4">
-      <Text className="text-2xl font-bold mb-6 text-center">Enter Facility Details</Text>
+    <View style={{ flex: 1, backgroundColor: backgroundColor, padding: 16 }}>
+      <ThemedText style={{ color: textColor, fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' }}>
+        Enter Facility Details
+      </ThemedText>
 
       <TextInput
         placeholder="Facility Name"
         value={facilityName}
         onChangeText={setFacilityName}
-        className="border p-3 rounded-xl mb-4"
+        style={{
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: 12,
+          borderRadius: 12,
+          marginBottom: 16,
+          color: textColor,
+        }}
       />
       <TextInput
         placeholder="Address"
         value={address}
         onChangeText={setAddress}
-        className="border p-3 rounded-xl mb-4"
+        style={{
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: 12,
+          borderRadius: 12,
+          marginBottom: 16,
+          color: textColor,
+        }}
       />
       <TextInput
         placeholder="Phone Number"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
-        className="border p-3 rounded-xl mb-4"
+        style={{
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: 12,
+          borderRadius: 12,
+          marginBottom: 16,
+          color: textColor,
+        }}
       />
       <TextInput
         placeholder="Short Description"
@@ -97,15 +137,32 @@ const EnterFacilityDetails = () => {
         onChangeText={setDescription}
         multiline
         numberOfLines={4}
-        className="border p-3 rounded-xl mb-4"
+        style={{
+          borderWidth: 1,
+          borderColor: colors.border,
+          padding: 12,
+          borderRadius: 12,
+          marginBottom: 16,
+          color: textColor,
+        }}
       />
 
       <TouchableOpacity onPress={handlePickImage}>
-        <View className="flex items-center justify-center p-6 rounded-2xl border-dashed border-2 border-gray-400 mb-6">
+        <View
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            borderRadius: 16,
+            borderWidth: 2,
+            borderColor: colors.border,
+            marginBottom: 24,
+          }}
+        >
           {selectedImage ? (
-            <Image source={{ uri: selectedImage }} className="w-40 h-40 rounded-xl" />
+            <Image source={{ uri: selectedImage }} style={{ width: 160, height: 160, borderRadius: 16 }} />
           ) : (
-            <Text className="text-gray-500">Upload Facility Image</Text>
+            <Text style={{ color: colors.text }}>Upload Facility Image</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -113,12 +170,17 @@ const EnterFacilityDetails = () => {
       <TouchableOpacity
         onPress={handleSubmit}
         disabled={loading}
-        className={`p-4 rounded-xl items-center ${loading ? 'bg-gray-400' : 'bg-blue-600'}`}
+        style={{
+          padding: 16,
+          borderRadius: 16,
+          alignItems: 'center',
+          backgroundColor: loading ? colors.disabled : colors.primary,
+        }}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text className="text-white font-bold">Save and Continue</Text>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Save and refresh</Text>
         )}
       </TouchableOpacity>
     </View>
@@ -126,4 +188,3 @@ const EnterFacilityDetails = () => {
 };
 
 export default EnterFacilityDetails;
-
