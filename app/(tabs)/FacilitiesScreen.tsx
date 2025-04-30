@@ -12,7 +12,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 interface FacilityDetails {
   facilityName: string;
   address: string;
@@ -50,15 +49,21 @@ export default function FacilitiesScreen() {
       if (storedData) {
         const rawData: FacilityData[] = JSON.parse(storedData);
 
-        const facilitiesList: FacilityWithAccess[] = rawData.map((facility) => ({
-          ...facility.facilityDetails,
-          accessCount: 0,
-        }));
 
-        const sortedFacilities = facilitiesList.sort((a, b) =>
-          a.facilityName.localeCompare(b.facilityName)
-        );
+		const facilitiesList: FacilityWithAccess[] = rawData
+		.map((facility) => facility?.facilityDetails)
+		.filter((details): details is FacilityDetails => !!details?.facilityName) // ensures type safety
+		.map((details) => ({
+			...details,
+			accessCount: 0,
+		}));
 
+
+		// Safe sort
+		const sortedFacilities = facilitiesList.sort((a, b) =>
+		(a.facilityName || '').localeCompare(b.facilityName || '')
+		);
+		
         setFacilities(sortedFacilities);
         setFilteredFacilities(sortedFacilities);
       }
@@ -123,10 +128,7 @@ export default function FacilitiesScreen() {
           style={styles.facilityButton}
           onPress={() => handleFacilityPress(facility)}
         >
-          <View>
-            <Text style={styles.facilityText}>{facility.facilityName}</Text>
-            <Text style={styles.addressText}>{facility.address}</Text>
-          </View>
+          <Text style={styles.facilityText}>{facility.facilityName}</Text>
           <Ionicons name="star" size={20} color="gold" />
         </TouchableOpacity>
       ))}
@@ -149,10 +151,7 @@ export default function FacilitiesScreen() {
           style={styles.facilityButton}
           onPress={() => handleFacilityPress(facility)}
         >
-          <View>
-            <Text style={styles.facilityText}>{facility.facilityName}</Text>
-            <Text style={styles.addressText}>{facility.address}</Text>
-          </View>
+          <Text style={styles.facilityText}>{facility.facilityName}</Text>
           <Ionicons name="arrow-forward" size={20} color="black" />
         </TouchableOpacity>
       ))}
@@ -192,11 +191,6 @@ const styles = StyleSheet.create({
   facilityText: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  addressText: {
-    fontSize: 14,
-    color: 'gray',
-    marginTop: 4,
   },
   searchContainer: {
     flexDirection: 'row',

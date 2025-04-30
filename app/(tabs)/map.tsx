@@ -66,47 +66,7 @@ export default function MapScreen() {
 		console.log(mapUrl);
 		
 	}, []);
-	// const setfacilities = async () => {
-	// 	const storedData = await AsyncStorage.getItem('currentFacility');
-	// 	if (storedData) {
-	// 		const details = JSON.parse(storedData).facilityDetails;
-	// 		const facilities = [
-	// 			details.address,
-	// 			details.facilityName,
-	// 		]
 
-	// 		const searchQuery = facilities
-	// 		.map(name => name.trim().replace(/\s+/g, '+'))
-	// 		.join('+');
-
-	// 		const url = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
-
-	// 		setMapUrl(url);
-	// 	  }
-
-	// };
-
-
-	
-  	// const facilities = [
-    // 'Betty Ford Center California',
-    // 'Hazelden Betty Ford Minnesota',
-    // 'Promises Treatment Center Malibu',
-    // 'The Ranch Tennessee',
-    // 'Passages Malibu California',
-// 	details.address,
-// 	'university of nairobi',
-//   ];
-
-  // Replace spaces with + inside each facility, then join all with +
-//   const searchQuery = facilities
-//     .map(name => name.trim().replace(/\s+/g, '+'))
-//     .join('+');
-
-//   console.log(searchQuery);
-  
-
-//   const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
 
   return (
     <View style={styles.container}>
