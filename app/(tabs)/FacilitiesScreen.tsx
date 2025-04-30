@@ -49,15 +49,21 @@ export default function FacilitiesScreen() {
       if (storedData) {
         const rawData: FacilityData[] = JSON.parse(storedData);
 
-        const facilitiesList: FacilityWithAccess[] = rawData.map((facility) => ({
-          ...facility.facilityDetails,
-          accessCount: 0,
-        }));
 
-        const sortedFacilities = facilitiesList.sort((a, b) =>
-          a.facilityName.localeCompare(b.facilityName)
-        );
+		const facilitiesList: FacilityWithAccess[] = rawData
+		.map((facility) => facility?.facilityDetails)
+		.filter((details): details is FacilityDetails => !!details?.facilityName) // ensures type safety
+		.map((details) => ({
+			...details,
+			accessCount: 0,
+		}));
 
+
+		// Safe sort
+		const sortedFacilities = facilitiesList.sort((a, b) =>
+		(a.facilityName || '').localeCompare(b.facilityName || '')
+		);
+		
         setFacilities(sortedFacilities);
         setFilteredFacilities(sortedFacilities);
       }

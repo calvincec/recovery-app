@@ -23,6 +23,8 @@ const sendMessageToBot = async (input: string) => {
         },
       }
     );
+	console.log(OPENROUTER_API_KEY);
+	
 
     const botReply = response.data.choices[0].message.content;
     return botReply;
