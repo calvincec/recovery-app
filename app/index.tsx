@@ -19,7 +19,7 @@ export default function LaunchScreen() {
 	  {/* Get Started Button */}
 	  <Button
 		title="Get Started"
-		onPress={() => router.replace('/auths/LoginScreen')} // 👈 replace so LaunchScreen won't stay in stack
+		onPress={() => router.replace('/(tabs)/LoginScreen')} // 👈 replace so LaunchScreen won't stay in stack
 	  />
 	</View>
   );
