@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 
 export default function LaunchScreen() {
   const router = useRouter();
+  
 
   return (
 	<View style={styles.container}>

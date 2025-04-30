@@ -32,8 +32,21 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack initialRouteName="index">
 	  	<Stack.Screen name="index" options={{ headerShown: false }} />
-		  <Stack.Screen name="auths" options={{ headerShown: false }} />
+		  <Stack.Screen name="auths/LoginScreen" options={{ headerShown: false }} />
+		  <Stack.Screen name="auths/FacilityAuthScreen" options={{ headerShown: false }} />
+		  <Stack.Screen name="auths/UserAuthScreen" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/chat" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/EnterFacilityDetails" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/FacilitiesScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/FacilityAuthScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/FacilityDetail" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/HomeScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/LoginScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/maps" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/ProfileScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/StreaksScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/UserAuthScreen" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
