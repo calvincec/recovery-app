@@ -17,24 +17,23 @@ export default function MapScreen() {
 	useEffect(()=>{
 
 		const setfacilities = async () => {
+			let facilities = [
+				'facilitycenter',
+				'facilitycenter',
+			]
 			const storedData = await AsyncStorage.getItem('currentFacility');
 			if (storedData) {
 				const details = JSON.parse(storedData).facilityDetails;
-				let facilities = [
-					'facilitycenter',
-					'facilitycenter',
-				]
-				if(details.address && details.facilityName){
-					facilities = [
-						details.address,
-						details.facilityName,
-					]
+				
+				if(details){
+					if(details.address && details.facilityName){
+						facilities = [
+							details.address,
+							details.facilityName,
+						]
+					}	
 				}
-				// const facilities = [
-				// 	details.address,
-				// 	details.facilityName,
-				// ]
-	
+				
 				const searchQuery = facilities
 				.map(name => name.trim().replace(/\s+/g, '+'))
 				.join('+');
@@ -48,15 +47,14 @@ export default function MapScreen() {
 				if(storedData){
 					
 				const details = JSON.parse(storedData)[0].facilityDetails;
-				let facilities = [
-					'facilitycenter',
-					'facilitycenter',
-				]
-				if(details.address && details.facilityName){
-					facilities = [
-						details.address,
-						details.facilityName,
-					]
+				
+				if(details){
+					if(details.address && details.facilityName){
+						facilities = [
+							details.address,
+							details.facilityName,
+						]
+					}	
 				}
 	
 				const searchQuery = facilities
@@ -72,6 +70,7 @@ export default function MapScreen() {
 				}
 				else{
 					const url = `https://www.google.com/maps/embed/v1/place?q=$health+center&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
+					setMapUrl(url);
 				}
 
 			}
