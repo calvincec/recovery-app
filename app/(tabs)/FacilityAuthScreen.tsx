@@ -103,6 +103,7 @@ export default function FacilityAuthScreen() {
             setMessageType('success');
 
             await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
+				await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
 
             // ✅ Redirect facility admin to the appointment viewer
             router.replace('/AdminAppointmentRequestsScreen');
