@@ -166,7 +166,7 @@ export default function FacilitiesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#344d3f',
     padding: 20,
   },
   heading: {
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   clearButton: {
-    backgroundColor: '#ff4d4f',
+    backgroundColor: '#000000',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

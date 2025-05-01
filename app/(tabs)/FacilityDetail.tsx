@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+const backgroundImage = require('../auths/login.png');
 
 export default function FacilityDetail() {
   const [facilityData, setFacilityData] = useState<{
@@ -112,7 +113,7 @@ export default function FacilityDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#344d3f',
     padding: 20,
   },
   loadingContainer: {
