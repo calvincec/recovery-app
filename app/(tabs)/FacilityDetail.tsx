@@ -1,4 +1,3 @@
-// FacilityDetail.tsx
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -8,10 +7,10 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-const backgroundImage = require('../auths/login.png');
 
 export default function FacilityDetail() {
   const [facilityData, setFacilityData] = useState<{
@@ -43,10 +42,7 @@ export default function FacilityDetail() {
   }, []);
 
   const goToMap = () => {
-      router.push({
-        pathname: '/(tabs)/map',
-      });
-    
+    router.push('/(tabs)/map');
   };
 
   const handleExit = async () => {
@@ -68,7 +64,27 @@ export default function FacilityDetail() {
 	  console.log('Failed to remove currentFacility:', error);
 	}
   };
-  
+
+  const handleRequestAppointment = async () => {
+    try {
+      const appointment = {
+        id: Date.now(),
+        facility: facilityData?.facilityName,
+        timestamp: new Date().toISOString(),
+        status: 'Pending',
+      };
+
+      const existing = await AsyncStorage.getItem('appointmentRequests');
+      let updatedRequests = existing ? JSON.parse(existing) : [];
+      updatedRequests.push(appointment);
+
+      await AsyncStorage.setItem('appointmentRequests', JSON.stringify(updatedRequests));
+      router.push('/AppointmentConfirmationScreen');
+    } catch (error) {
+      Alert.alert('Error', 'Could not submit your appointment request.');
+      console.log(error);
+    }
+  };
 
   if (loading) {
     return (
@@ -91,11 +107,7 @@ export default function FacilityDetail() {
   return (
     <ScrollView style={styles.container}>
       {facilityData.imageUri && (
-        <Image
-          source={{ uri: facilityData.imageUri }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: facilityData.imageUri }} style={styles.image} resizeMode="cover" />
       )}
 
       <View style={styles.card}>
@@ -114,9 +126,14 @@ export default function FacilityDetail() {
         <Text style={styles.label}>Description:</Text>
         <Text style={styles.text}>{facilityData.description}</Text>
       </View>
-	  <TouchableOpacity onPress={handleExit} style={styles.exitButton}>
-		<Text style={styles.exitText}>Exit</Text>
-		</TouchableOpacity>
+
+      <TouchableOpacity onPress={handleRequestAppointment} style={styles.appointmentButton}>
+        <Text style={styles.buttonText}>Request Appointment</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleExit} style={styles.exitButton}>
+        <Text style={styles.exitText}>Exit</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -138,10 +155,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 20,
     marginBottom: 20,
-	alignSelf: 'center',
-	// place it at the middle
-
-
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: 'white',
@@ -169,16 +183,28 @@ const styles = StyleSheet.create({
     color: '#555',
     marginBottom: 10,
   },
+  appointmentButton: {
+    backgroundColor: '#6f2da8',
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginTop: 24,
+    alignItems: 'center',
+  },
   exitButton: {
-	marginTop: 30,
-	backgroundColor: '#e53935',
-	paddingVertical: 12,
-	borderRadius: 8,
-	alignItems: 'center',
+    marginTop: 16,
+    backgroundColor: '#6f2da8',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   exitText: {
-	color: 'white',
-	fontSize: 16,
-	fontWeight: 'bold',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
