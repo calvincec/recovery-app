@@ -1,5 +1,12 @@
-import { useState } from 'react'; 
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -51,15 +58,20 @@ export default function FacilityAuthScreen() {
       }
     }
 
-    let facilityDetails = '';
-    const facilityData = { facilityName, email, password, facilityDetails };
+    const facilityData = {
+      facilityName,
+      email,
+      password,
+      role: 'admin', // ✅ include admin role
+      facilityDetails: '',
+    };
 
     try {
       await saveFacilityData(facilityData);
       setMessage('Facility account created successfully!');
       setMessageType('success');
       await AsyncStorage.setItem('currentFacility', JSON.stringify(facilityData));
-      router.replace('/EnterFacilityDetails');
+      router.replace('/EnterFacilityDetails'); // ✅ still goes here
     } catch (error) {
       console.log(error);
       setMessage('Something went wrong while creating the account.');
@@ -82,26 +94,26 @@ export default function FacilityAuthScreen() {
         return;
       }
 
-	  const strvalues = storedData;
-	  const arrvalues = JSON.parse(strvalues);
+      const arrvalues = JSON.parse(storedData);
 
-	  for (let i = 0; i < arrvalues.length; i++) {
-		if (arrvalues[i].email === email) {
-			if (arrvalues[i].password === password) {
-				setMessage('Logged in successfully!');
-				setMessageType('success');
-				//save the current user on local storage
-				await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
-				router.replace('/FacilityDetail');
-				return;
-			}
-		}
-		if (i === arrvalues.length - 1) {
-			setMessage('Email or password is wrong. Please try again.');
-			setMessageType('error');
-		}		
-	}
+      for (let i = 0; i < arrvalues.length; i++) {
+        if (arrvalues[i].email === email) {
+          if (arrvalues[i].password === password) {
+            setMessage('Logged in successfully!');
+            setMessageType('success');
 
+            await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
+
+            // ✅ Redirect facility admin to the appointment viewer
+            router.replace('/AdminAppointmentRequestsScreen');
+            return;
+          }
+        }
+        if (i === arrvalues.length - 1) {
+          setMessage('Email or password is incorrect.');
+          setMessageType('error');
+        }
+      }
     } catch (error) {
       console.error(error);
       setMessage('Something went wrong during login.');
@@ -111,7 +123,9 @@ export default function FacilityAuthScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{isCreatingAccount ? 'Create Facility Account' : 'Facility Login'}</Text>
+      <Text style={styles.title}>
+        {isCreatingAccount ? 'Create Facility Account' : 'Facility Login'}
+      </Text>
 
       <View style={styles.toggleContainer}>
         <TouchableOpacity
@@ -139,12 +153,14 @@ export default function FacilityAuthScreen() {
         <View style={styles.formContainer}>
           <TextInput
             placeholder="Facility Name"
+            placeholderTextColor="#ccc"
             style={styles.input}
             value={facilityName}
             onChangeText={setFacilityName}
           />
           <TextInput
             placeholder="Facility Email"
+            placeholderTextColor="#ccc"
             style={styles.input}
             keyboardType="email-address"
             value={email}
@@ -152,6 +168,7 @@ export default function FacilityAuthScreen() {
           />
           <TextInput
             placeholder="Password"
+            placeholderTextColor="#ccc"
             style={styles.input}
             secureTextEntry
             value={password}
@@ -163,6 +180,7 @@ export default function FacilityAuthScreen() {
         <View style={styles.formContainer}>
           <TextInput
             placeholder="Facility Email"
+            placeholderTextColor="#ccc"
             style={styles.input}
             keyboardType="email-address"
             value={email}
@@ -170,6 +188,7 @@ export default function FacilityAuthScreen() {
           />
           <TextInput
             placeholder="Password"
+            placeholderTextColor="#ccc"
             style={styles.input}
             secureTextEntry
             value={password}
@@ -194,13 +213,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingHorizontal: 20,
     paddingTop: 100,
-    backgroundColor: '#33ab93', // Updated background color
+    backgroundColor: '#33ab93',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     alignSelf: 'center',
     marginBottom: 20,
+    color: 'white',
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -214,14 +234,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeButton: {
-    backgroundColor: '#428a50f',
+    backgroundColor: '#245b4f',
   },
   activeText: {
     color: '#fff',
     fontWeight: 'bold',
   },
   inactiveText: {
-    color: '#007bff',
+    color: '#ccc',
   },
   formContainer: {
     gap: 12,
@@ -235,6 +255,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     backgroundColor: '#5c7872',
+    color: '#fff',
   },
   message: {
     textAlign: 'center',
@@ -242,9 +263,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   errorText: {
-    color: 'red',
+    color: '#ff4d4d',
   },
   successText: {
-    color: 'green',
+    color: '#00cc88',
   },
 });

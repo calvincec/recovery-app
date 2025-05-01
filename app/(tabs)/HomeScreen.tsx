@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 
 const backgroundImage = require('../auths/login.png'); // Replace with your image path
 
+
 export default function HomeScreen() {
   const router = useRouter();
 
