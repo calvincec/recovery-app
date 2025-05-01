@@ -52,7 +52,18 @@ export default function FacilityDetail() {
   const handleExit = async () => {
 	try {
 	  await AsyncStorage.removeItem('currentFacility'); // Clear the stored facility
-	  router.replace('/LoginScreen'); // Navigate to home
+	  //if prevoous rooter is FacilitiesScreen then router.replace('/LoginScreen') else router.back()
+	  const prevRoute = await AsyncStorage.getItem('prevroute');
+	  if (prevRoute === 'EnterFacilityDetails') {
+		//clear the prevroute
+		await AsyncStorage.removeItem('prevroute');
+		router.replace('/LoginScreen');
+	  }
+	  else {
+		router.back();
+	  }
+	  
+	//   router.replace('/LoginScreen');
 	} catch (error) {
 	  console.log('Failed to remove currentFacility:', error);
 	}

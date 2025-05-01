@@ -92,6 +92,7 @@ export default function FacilityAuthScreen() {
 				setMessageType('success');
 				//save the current user on local storage
 				await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
+				await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
 				router.replace('/FacilityDetail');
 				return;
 			}

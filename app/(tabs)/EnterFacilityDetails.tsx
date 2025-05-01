@@ -103,6 +103,8 @@ const EnterFacilityDetails = () => {
               resetFields();
               setMessage('Successfully entered the details');
               setMessageType('success');
+			//   set a local storage item named prevroute="EnterFacilityDetails"
+			  await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
               router.replace('../(tabs)/FacilityDetail');
               return;
             }
