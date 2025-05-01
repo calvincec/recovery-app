@@ -1,8 +1,18 @@
-// app/screens/ProfileScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ImageBackground,
+  StatusBar,
+  Dimensions,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const backgroundImage = require('../auths/login.png'); // Replace with your local asset
 
 const ProfileScreen = () => {
   const router = useRouter();
@@ -11,17 +21,15 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-		// fetch data from currentUser in AsyncStorage
-		const currentUser = await AsyncStorage.getItem('currentUser');
-		if (currentUser) {
-			const parsedUser = JSON.parse(currentUser);
-			setUser({
-				name: parsedUser.name,
-				email: parsedUser.email,
-				streak: parsedUser.streak || 0, // Default 0 if not stored
-				profileImage: 'https://via.placeholder.com/150', // Placeholder image
-			});
-
+        const currentUser = await AsyncStorage.getItem('currentUser');
+        if (currentUser) {
+          const parsedUser = JSON.parse(currentUser);
+          setUser({
+            name: parsedUser.name,
+            email: parsedUser.email,
+            streak: parsedUser.streak || 0,
+            profileImage: parsedUser.profileImage || 'https://via.placeholder.com/150',
+          });
         }
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -31,17 +39,10 @@ const ProfileScreen = () => {
     fetchUserData();
   }, []);
 
-  
-
   const handleLogout = async () => {
-	//logout someone without using the alert
-	await AsyncStorage.removeItem('currentUser'); // remove current user data
-	router.replace('/UserAuthScreen'); // navigate to UserAuthScreen
-
-
+    await AsyncStorage.removeItem('currentUser');
+    router.replace('/UserAuthScreen');
   };
-  
-  
 
   const handleViewStreak = () => {
     if (user) {
@@ -54,62 +55,104 @@ const ProfileScreen = () => {
 
   if (!user) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading Profile...</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading Profile...</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white', padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 24, textAlign: 'center' }}>
-        Profile
-      </Text>
+    <ImageBackground source={backgroundImage} style={styles.background} resizeMode="cover">
+      <StatusBar barStyle="light-content" />
+      <View style={styles.overlay}>
+        <Text style={styles.title}>Profile</Text>
 
-      {/* Profile Image */}
-      <View style={{ alignItems: 'center', marginBottom: 24 }}>
-        <Image
-          source={{ uri: user.profileImage }}
-          style={{ width: 120, height: 120, borderRadius: 60 }}
-        />
+        <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+
+        <Text style={styles.detailText}>Name: {user.name}</Text>
+        <Text style={styles.detailText}>Email: {user.email}</Text>
+        <Text style={styles.detailText}>Streak: {user.streak} days</Text>
+
+        <TouchableOpacity style={[styles.button, styles.streakButton]} onPress={handleViewStreak}>
+          <Text style={styles.buttonText}>View Streak</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* User Details */}
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Name: {user.name}</Text>
-      <Text style={{ fontSize: 18, marginBottom: 8 }}>Email: {user.email}</Text>
-      <Text style={{ fontSize: 18, marginBottom: 24 }}>Streak: {user.streak} days</Text>
-
-      {/* View Streak Button */}
-      <TouchableOpacity
-        onPress={handleViewStreak}
-        style={{ backgroundColor: 'blue', padding: 16, borderRadius: 12, marginBottom: 16 }}
-      >
-        <Text style={{ color: 'white', textAlign: 'center', fontSize: 18 }}>View Streak</Text>
-      </TouchableOpacity>
-
-      {/* Logout Button */}
-      <TouchableOpacity
-        onPress={handleLogout}
-        style={{ backgroundColor: 'green', padding: 16, borderRadius: 12 }}
-      >
-        <Text style={{ color: 'white', textAlign: 'center', fontSize: 18 }}>Logout</Text>
-      </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
 };
 
 export default ProfileScreen;
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-	message: {
-		textAlign: 'center',
-		marginTop: 10,
-		fontSize: 16,
-	  },
-	  errorText: {
-		color: 'red',
-	  },
-	  successText: {
-		color: 'green',
-	  },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlay: {
+    width: '85%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 20,
+    borderWidth: 3,
+    borderColor: '#6f2da8',
+  },
+  detailText: {
+    fontSize: 18,
+    marginBottom: 8,
+    color: '#444',
+  },
+  button: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  streakButton: {
+    backgroundColor: '#6f2da8',
+  },
+  logoutButton: {
+    backgroundColor: '#344d3f',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#440961',
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 18,
+  },
 });

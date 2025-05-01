@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator, Button, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedText } from '@/components/ThemedText';
@@ -14,7 +23,7 @@ const EnterFacilityDetails = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const [message, setMessage] = useState(''); 
+  const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
   const router = useRouter();
@@ -25,8 +34,8 @@ const EnterFacilityDetails = () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-		setMessage('Permission Required, Gallery access is needed to upload an image.');
-      	setMessageType('error');
+        setMessage('Permission required to access gallery.');
+        setMessageType('error');
         return;
       }
 
@@ -54,9 +63,8 @@ const EnterFacilityDetails = () => {
 
   const handleSubmit = async () => {
     if (!facilityName || !address || !phoneNumber || !description || !selectedImage) {
-		// console.log("Incomplete details", facilityName, address, phoneNumber, description, selectedImage);
-		setMessage('Incomplete Details Please complete all fields and upload an image.');
-      	setMessageType('error');
+      setMessage('Incomplete details. Please fill all fields and upload an image.');
+      setMessageType('error');
       return;
     }
 
@@ -71,41 +79,36 @@ const EnterFacilityDetails = () => {
 
     try {
       setLoading(true);
-	//   set facilityDetails in currentfacility
-	  const currentFacility = await AsyncStorage.getItem('currentFacility');
-	  if (currentFacility) {
-		const parsedFacility = JSON.parse(currentFacility);
-		parsedFacility.facilityDetails = newFacility;
-		await AsyncStorage.setItem('currentFacility', JSON.stringify(parsedFacility));
 
+      const currentFacility = await AsyncStorage.getItem('currentFacility');
+      if (currentFacility) {
+        const parsedFacility = JSON.parse(currentFacility);
+        parsedFacility.facilityDetails = newFacility;
+        await AsyncStorage.setItem('currentFacility', JSON.stringify(parsedFacility));
 
-		const existingData = await AsyncStorage.getItem('facilityData');
-		let updatedData = [];
+        const existingData = await AsyncStorage.getItem('facilityData');
+        let updatedData = [];
 
-		if (existingData !== null) {
-		  updatedData = JSON.parse(existingData);
-		  if (!Array.isArray(updatedData)) {
-			updatedData = [updatedData];
-		  }
+        if (existingData) {
+          updatedData = JSON.parse(existingData);
+          if (!Array.isArray(updatedData)) updatedData = [updatedData];
 
-		for (let i = 0; i < updatedData.length; i++) {
-			if (updatedData[i].facilityName === parsedFacility.facilityName && updatedData[i].email === parsedFacility.email) {
-				updatedData[i] = parsedFacility; // Update the existing entry
-				await AsyncStorage.setItem('facilityData', JSON.stringify(updatedData));
-				resetFields();
-				setMessage('Successfully entered the details');
-      			setMessageType('success');
-				router.replace('/(tabs)/FacilityDetail')
-
-				
-				return;
-			}
-		}
-
-	  	}
-		}
-
-
+          for (let i = 0; i < updatedData.length; i++) {
+            if (
+              updatedData[i].facilityName === parsedFacility.facilityName &&
+              updatedData[i].email === parsedFacility.email
+            ) {
+              updatedData[i] = parsedFacility;
+              await AsyncStorage.setItem('facilityData', JSON.stringify(updatedData));
+              resetFields();
+              setMessage('Successfully entered the details');
+              setMessageType('success');
+              router.replace('../(tabs)/FacilityDetail');
+              return;
+            }
+          }
+        }
+      }
     } catch (error) {
       console.log('Saving Error:', error);
     } finally {
@@ -114,101 +117,45 @@ const EnterFacilityDetails = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#6e3b37', padding: 16 }}>
-      <ThemedText
-        style={{
-          color: textColor,
-          fontSize: 24,
-          fontWeight: 'bold',
-          marginBottom: 24,
-          textAlign: 'center',
-        }}
-      >
-        Enter Facility Details
-      </ThemedText>
+    <View style={styles.container}>
+      <ThemedText style={styles.title}>Enter Facility Details</ThemedText>
 
       <TextInput
         placeholder="Facility Name"
-        placeholderTextColor="#ccc"
+        placeholderTextColor="#888"
         value={facilityName}
         onChangeText={setFacilityName}
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          padding: 12,
-          borderRadius: 12,
-          marginBottom: 16,
-          color: textColor,
-          backgroundColor: '#fff',
-        }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Address"
-        placeholderTextColor="#ccc"
+        placeholderTextColor="#888"
         value={address}
         onChangeText={setAddress}
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          padding: 12,
-          borderRadius: 12,
-          marginBottom: 16,
-          color: textColor,
-          backgroundColor: '#fff',
-        }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Phone Number"
-        placeholderTextColor="#ccc"
+        placeholderTextColor="#888"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
         keyboardType="phone-pad"
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          padding: 12,
-          borderRadius: 12,
-          marginBottom: 16,
-          color: textColor,
-          backgroundColor: '#fff',
-        }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Short Description"
-        placeholderTextColor="#ccc"
+        placeholderTextColor="#888"
         value={description}
         onChangeText={setDescription}
         multiline
         numberOfLines={4}
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          padding: 12,
-          borderRadius: 12,
-          marginBottom: 16,
-          color: textColor,
-          backgroundColor: '#fff',
-        }}
+        style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
       />
 
       <TouchableOpacity onPress={handlePickImage}>
-        <View
-          style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 24,
-            borderRadius: 16,
-            borderWidth: 2,
-            borderColor: '#ccc',
-            marginBottom: 24,
-            backgroundColor: '#fff',
-          }}
-        >
+        <View style={styles.imagePicker}>
           {selectedImage ? (
-            <Image
-              source={{ uri: selectedImage }}
-              style={{ width: 160, height: 160, borderRadius: 16 }}
-            />
+            <Image source={{ uri: selectedImage }} style={styles.image} />
           ) : (
             <Text style={{ color: '#666' }}>Upload Facility Image</Text>
           )}
@@ -218,12 +165,7 @@ const EnterFacilityDetails = () => {
       <TouchableOpacity
         onPress={handleSubmit}
         disabled={loading}
-        style={{
-          padding: 16,
-          borderRadius: 16,
-          alignItems: 'center',
-          backgroundColor: loading ? '#aaa' : '#2196f3',
-        }}
+        style={[styles.submitButton, loading && { backgroundColor: '#aaa' }]}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
@@ -232,29 +174,70 @@ const EnterFacilityDetails = () => {
         )}
       </TouchableOpacity>
 
-	  {/* Display feedback message */}
-			{message !== '' && (
-			  <Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
-				{message}
-			  </Text>
-			)}
+      {message !== '' && (
+        <Text style={[styles.message, messageType === 'error' ? styles.errorText : styles.successText]}>
+          {message}
+        </Text>
+      )}
     </View>
   );
 };
 
 export default EnterFacilityDetails;
 
-
 const styles = StyleSheet.create({
-	message: {
-		textAlign: 'center',
-		marginTop: 10,
-		fontSize: 16,
-	  },
-	  errorText: {
-		color: 'red',
-	  },
-	  successText: {
-		color: 'green',
-	  },
+  container: {
+    flex: 1,
+    backgroundColor: '#344d3f',
+    padding: 20,
+  },
+  title: {
+    color: 'black',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#344d3f',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 16,
+    fontSize: 16,
+    color: 'white',
+  },
+  imagePicker: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    marginBottom: 24,
+    backgroundColor: '#344d3f',
+  },
+  image: {
+    width: 160,
+    height: 160,
+    borderRadius: 16,
+  },
+  submitButton: {
+    backgroundColor: '#344d3f',
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  message: {
+    textAlign: 'center',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  errorText: {
+    color: '#d32f2f',
+  },
+  successText: {
+    color: '#388e3c',
+  },
 });
