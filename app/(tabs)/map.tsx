@@ -20,10 +20,20 @@ export default function MapScreen() {
 			const storedData = await AsyncStorage.getItem('currentFacility');
 			if (storedData) {
 				const details = JSON.parse(storedData).facilityDetails;
-				const facilities = [
-					details.address,
-					details.facilityName,
+				let facilities = [
+					'facilitycenter',
+					'facilitycenter',
 				]
+				if(details.address && details.facilityName){
+					facilities = [
+						details.address,
+						details.facilityName,
+					]
+				}
+				// const facilities = [
+				// 	details.address,
+				// 	details.facilityName,
+				// ]
 	
 				const searchQuery = facilities
 				.map(name => name.trim().replace(/\s+/g, '+'))
@@ -38,10 +48,16 @@ export default function MapScreen() {
 				if(storedData){
 					
 				const details = JSON.parse(storedData)[0].facilityDetails;
-				const facilities = [
-					details.address,
-					details.facilityName,
+				let facilities = [
+					'facilitycenter',
+					'facilitycenter',
 				]
+				if(details.address && details.facilityName){
+					facilities = [
+						details.address,
+						details.facilityName,
+					]
+				}
 	
 				const searchQuery = facilities
 				.map(name => name.trim().replace(/\s+/g, '+'))

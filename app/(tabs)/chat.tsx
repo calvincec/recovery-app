@@ -5,7 +5,8 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import BackButton from '@/navigation/BackButton';
 import { useRouter } from 'expo-router';
-import { OPENROUTER_API_KEY } from '@env';
+// import { OPENROUTER_API_KEY } from '@env';
+const OPENROUTER_API_KEY='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'
 
 // Function to send message to OpenRouter
 const sendMessageToBot = async (input: string) => {
