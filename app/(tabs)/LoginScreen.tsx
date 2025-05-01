@@ -37,7 +37,7 @@ export default function LoginScreen() {
       resizeMode="cover"
       style={styles.background}
     >
-		<img src="" alt="an image"  />
+		
       <StatusBar barStyle="light-content" />
 
       <View style={styles.overlay}>
