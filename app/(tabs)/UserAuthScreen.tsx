@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons'; // ✅ [1] Import Ionicons
 
 const backgroundImage = require('../auths/login.png'); // Adjust path if needed
 
@@ -121,6 +122,14 @@ export default function UserAuthScreen() {
     >
       <StatusBar barStyle="light-content" />
       <View style={styles.overlay}>
+
+        {/* ✅ [2] Back Icon */}
+        <View style={styles.backIconContainer}>
+          <TouchableOpacity onPress={() => router.replace('/LoginScreen')}>
+            <Ionicons name="arrow-back" size={28} color="#333" />
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.title}>{isCreatingAccount ? 'Create Account' : 'Login'}</Text>
 
         <View style={styles.toggleContainer}>
@@ -199,6 +208,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 8,
+    position: 'relative',
+  },
+  backIconContainer: { // ✅ [3] Style for back icon positioning
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
   },
   title: {
     fontSize: 26,

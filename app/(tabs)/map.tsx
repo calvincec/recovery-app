@@ -1,117 +1,123 @@
-// MapScreen.tsx
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import BackButton from '@/navigation/BackButton';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 export default function MapScreen() {
+  const router = useRouter();
+  const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const [quote, setQuote] = useState('');
 
-	const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const quotes = [
+    "Wherever you are, care should follow.",
+    "Maps lead the way, health leads the future.",
+    "Compassion has no borders.",
+    "The road to wellness begins here.",
+    "Finding care just got easier.",
+  ];
 
-	// get the params and remember to import a missing module
-	//get the
-	useEffect(()=>{
+  useEffect(() => {
+    const setfacilities = async () => {
+      let facilities = ['facilitycenter', 'facilitycenter'];
 
-		const setfacilities = async () => {
-			let facilities = [
-				'facilitycenter',
-				'facilitycenter',
-			]
-			const storedData = await AsyncStorage.getItem('currentFacility');
-			if (storedData) {
-				const details = JSON.parse(storedData).facilityDetails;
-				
-				if(details){
-					if(details.address && details.facilityName){
-						facilities = [
-							details.address,
-							details.facilityName,
-						]
-					}	
-				}
-				
-				const searchQuery = facilities
-				.map(name => name.trim().replace(/\s+/g, '+'))
-				.join('+');
-	
-				const url = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
-	
-				setMapUrl(url);
-			  }
-			else{
-				const storedData = await AsyncStorage.getItem('facilityData');
-				if(storedData){
-					
-				const details = JSON.parse(storedData)[0].facilityDetails;
-				
-				if(details){
-					if(details.address && details.facilityName){
-						facilities = [
-							details.address,
-							details.facilityName,
-						]
-					}	
-				}
-	
-				const searchQuery = facilities
-				.map(name => name.trim().replace(/\s+/g, '+'))
-				.join('+');
-	
-				const url = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
+      const storedCurrent = await AsyncStorage.getItem('currentFacility');
 
-				
-				
-				setMapUrl(url);
+      if (storedCurrent) {
+        const details = JSON.parse(storedCurrent).facilityDetails;
 
-				}
-				else{
-					const url = `https://www.google.com/maps/embed/v1/place?q=$health+center&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
-					setMapUrl(url);
-				}
+        if (details?.address && details?.facilityName) {
+          facilities = [details.address, details.facilityName];
+        }
 
-			}
-	
-		};
+        const searchQuery = facilities
+          .map(name => name.trim().replace(/\s+/g, '+'))
+          .join('+');
 
-		setfacilities();
-		console.log(mapUrl);
-		
-	}, []);
+        const url = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
+        setMapUrl(url);
+      } else {
+        const storedFallback = await AsyncStorage.getItem('facilityData');
 
+        if (storedFallback) {
+          const details = JSON.parse(storedFallback)[0]?.facilityDetails;
+
+          if (details?.address && details?.facilityName) {
+            facilities = [details.address, details.facilityName];
+          }
+
+          const searchQuery = facilities
+            .map(name => name.trim().replace(/\s+/g, '+'))
+            .join('+');
+
+          const url = `https://www.google.com/maps/embed/v1/place?q=${searchQuery}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
+          setMapUrl(url);
+        } else {
+          const url = `https://www.google.com/maps/embed/v1/place?q=health+center&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`;
+          setMapUrl(url);
+        }
+      }
+
+      // Set random quote
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      setQuote(randomQuote);
+    };
+
+    setfacilities();
+  }, []);
+
+  const handleBack = async () => {
+    try {
+      const prevRoute = await AsyncStorage.getItem('mapRoute');
+
+      if (!prevRoute) {
+        router.back();
+      } else if (prevRoute === 'FacilityDetail') {
+        await AsyncStorage.removeItem('mapRoute');
+        router.replace('/FacilityDetail');
+      } else if (prevRoute === 'mapRoute') {
+        router.replace('/HomeScreen');
+      } else {
+        router.back();
+      }
+    } catch (error) {
+      console.error('Back navigation error:', error);
+      router.back();
+    }
+  };
 
   return (
     <View style={styles.container}>
+      {/* Back Icon */}
+      <TouchableOpacity style={styles.backIcon} onPress={handleBack}>
+        <Ionicons name="arrow-back" size={40} color="#946" />
+      </TouchableOpacity>
+
       <ThemedView
         style={{
           display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
+          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
           paddingTop: 20,
-          paddingBottom: 20,
+          paddingBottom: 10,
         }}
       >
-        <BackButton />
-        <ThemedView
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <ThemedText type="title">Map View</ThemedText>
-        </ThemedView>
+        <ThemedText type="title">Map View</ThemedText>
+        {quote !== '' && (
+          <ThemedText type="default" style={styles.quote}>
+            “{quote}”
+          </ThemedText>
+        )}
       </ThemedView>
 
       <View style={styles.outerdiv}>
         <View style={styles.innerdiv}>
           <iframe
             style={styles.iframe}
-            src={mapUrl}
+            src={mapUrl || ''}
             frameBorder="0"
             allowFullScreen
           ></iframe>
@@ -125,6 +131,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  backIcon: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 10,
+  },
   iframe: {
     width: '100%',
     height: '100%',
@@ -136,5 +148,12 @@ const styles = StyleSheet.create({
   outerdiv: {
     width: '100%',
     height: '100%',
+  },
+  quote: {
+    fontStyle: 'italic',
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: 12,
   },
 });

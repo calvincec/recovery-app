@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemedText } from '@/components/ThemedText';
 import { useTheme } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 const EnterFacilityDetails = () => {
   const [facilityName, setFacilityName] = useState('');
@@ -22,7 +23,6 @@ const EnterFacilityDetails = () => {
   const [description, setDescription] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
@@ -103,8 +103,7 @@ const EnterFacilityDetails = () => {
               resetFields();
               setMessage('Successfully entered the details');
               setMessageType('success');
-			//   set a local storage item named prevroute="EnterFacilityDetails"
-			  await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
+              await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
               router.replace('../(tabs)/FacilityDetail');
               return;
             }
@@ -181,6 +180,14 @@ const EnterFacilityDetails = () => {
           {message}
         </Text>
       )}
+
+      <TouchableOpacity
+        style={styles.exitButton}
+        onPress={() => router.replace('/FacilityAuthScreen')}
+      >
+        <Ionicons name="exit-outline" size={20} color="#fff" />
+        <Text style={styles.exitText}> Exit to Login</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -241,5 +248,20 @@ const styles = StyleSheet.create({
   },
   successText: {
     color: '#388e3c',
+  },
+  exitButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 30,
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: '#b71c1c',
+  },
+  exitText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 6,
+    fontWeight: 'bold',
   },
 });

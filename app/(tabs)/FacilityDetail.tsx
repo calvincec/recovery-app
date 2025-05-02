@@ -13,6 +13,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 export default function FacilityDetail() {
+  const quotes = [
+    "Quality healthcare is not a privilege, it’s a right.",
+    "Your health is your wealth.",
+    "Every life matters, every moment counts.",
+    "Healthcare is not just about medicine, it’s about compassion.",
+    "A healthy outside starts from the inside.",
+  ];
+
+  const [quote, setQuote] = useState('');
   const [facilityData, setFacilityData] = useState<{
     facilityName: string;
     address: string;
@@ -22,6 +31,7 @@ export default function FacilityDetail() {
   } | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [isAdminView, setIsAdminView] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,6 +41,15 @@ export default function FacilityDetail() {
         if (storedData) {
           setFacilityData(JSON.parse(storedData).facilityDetails);
         }
+
+        const prevRoute = await AsyncStorage.getItem('prevroute');
+        if (prevRoute === 'EnterFacilityDetails') {
+          setIsAdminView(true);
+        }
+
+        // Set a random quote
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        setQuote(randomQuote);
       } catch (error) {
         console.log('Error fetching facility data:', error);
       } finally {
@@ -41,48 +60,48 @@ export default function FacilityDetail() {
     fetchFacilityData();
   }, []);
 
-  const goToMap = () => {
+  const goToMap = async () => {
+    await AsyncStorage.setItem('maproute', 'FacilityDetail');
     router.push('/(tabs)/map');
   };
 
   const handleExit = async () => {
-	try {
-	  await AsyncStorage.removeItem('currentFacility'); // Clear the stored facility
-	  //if prevoous rooter is FacilitiesScreen then router.replace('/LoginScreen') else router.back()
-	  const prevRoute = await AsyncStorage.getItem('prevroute');
-	  if (prevRoute === 'EnterFacilityDetails') {
-		//clear the prevroute
-		await AsyncStorage.removeItem('prevroute');
-		router.replace('/LoginScreen');
-	  }
-	  else {
-		router.back();
-	  }
-	  
-	//   router.replace('/LoginScreen');
-	} catch (error) {
-	  console.log('Failed to remove currentFacility:', error);
-	}
+    try {
+      await AsyncStorage.removeItem('currentFacility');
+      const prevRoute = await AsyncStorage.getItem('prevroute');
+      if (prevRoute === 'EnterFacilityDetails') {
+        await AsyncStorage.removeItem('prevroute');
+        router.replace('/FacilityAuthScreen');
+      } else {
+        router.back();
+      }
+    } catch (error) {
+      console.log('Failed to remove currentFacility:', error);
+    }
   };
 
   const handleRequestAppointment = async () => {
-    try {
-      const appointment = {
-        id: Date.now(),
-        facility: facilityData?.facilityName,
-        timestamp: new Date().toISOString(),
-        status: 'Pending',
-      };
+    if (isAdminView) {
+      router.push('/AdminAppointmentRequestsScreen');
+    } else {
+      try {
+        const appointment = {
+          id: Date.now(),
+          facility: facilityData?.facilityName,
+          timestamp: new Date().toISOString(),
+          status: 'Pending',
+        };
 
-      const existing = await AsyncStorage.getItem('appointmentRequests');
-      let updatedRequests = existing ? JSON.parse(existing) : [];
-      updatedRequests.push(appointment);
+        const existing = await AsyncStorage.getItem('appointmentRequests');
+        let updatedRequests = existing ? JSON.parse(existing) : [];
+        updatedRequests.push(appointment);
 
-      await AsyncStorage.setItem('appointmentRequests', JSON.stringify(updatedRequests));
-      router.push('/AppointmentConfirmationScreen');
-    } catch (error) {
-      Alert.alert('Error', 'Could not submit your appointment request.');
-      console.log(error);
+        await AsyncStorage.setItem('appointmentRequests', JSON.stringify(updatedRequests));
+        router.push('/AppointmentConfirmationScreen');
+      } catch (error) {
+        Alert.alert('Error', 'Could not submit your appointment request.');
+        console.log(error);
+      }
     }
   };
 
@@ -106,6 +125,8 @@ export default function FacilityDetail() {
 
   return (
     <ScrollView style={styles.container}>
+      <Text style={styles.quote}>“{quote}”</Text>
+
       {facilityData.imageUri && (
         <Image source={{ uri: facilityData.imageUri }} style={styles.image} resizeMode="cover" />
       )}
@@ -128,7 +149,9 @@ export default function FacilityDetail() {
       </View>
 
       <TouchableOpacity onPress={handleRequestAppointment} style={styles.appointmentButton}>
-        <Text style={styles.buttonText}>Request Appointment</Text>
+        <Text style={styles.buttonText}>
+          {isAdminView ? 'Check all appointments' : 'Request Appointment'}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={handleExit} style={styles.exitButton}>
@@ -206,5 +229,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  quote: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    color: '#eee',
+    marginBottom: 20,
   },
 });

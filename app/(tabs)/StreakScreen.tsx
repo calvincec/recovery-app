@@ -1,21 +1,26 @@
-// app/screens/StreakScreen.tsx
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-const TOTAL_DAYS = 7; // Example 7-day streak
+const TOTAL_DAYS = 7;
 
 const StreakScreen = () => {
+  const router = useRouter();
   const { streak } = useLocalSearchParams<{ streak: string }>();
   const streakNumber = parseInt(streak || '0');
 
   return (
     <View style={styles.container}>
+      {/* 🔙 Back Icon */}
+      <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/ProfileScreen')}>
+        <Ionicons name="arrow-back" size={28} color="#333" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>🔥 Your Streak Progress 🔥</Text>
 
       <Image
-        source={require('../auths/streak.png')} // Make sure file is inside 'assets' folder
+        source={require('../auths/streak.png')}
         style={styles.streakImage}
         resizeMode="contain"
       />
@@ -49,7 +54,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F4FF',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 60,
+  },
+  backIcon: { // ✅ New style for back icon
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   title: {
     fontSize: 28,

@@ -45,7 +45,7 @@ export default function RootLayout() {
 		<Stack.Screen name="(tabs)/LoginScreen" options={{ headerShown: false }} />
 		<Stack.Screen name="(tabs)/map" options={{ headerShown: false }} />
 		<Stack.Screen name="(tabs)/ProfileScreen" options={{ headerShown: false }} />
-		<Stack.Screen name="(tabs)/StreaksScreen" options={{ headerShown: false }} />
+		<Stack.Screen name="(tabs)/StreakScreen" options={{ headerShown: false }} />
 		<Stack.Screen name="(tabs)/UserAuthScreen" options={{ headerShown: false }} />
 		<Stack.Screen name="(tabs)/AdminAppointmentRequestsScreen" options={{ headerShown: false }} />
 		<Stack.Screen name="(tabs)/AppointmentConfirmationScreen" options={{ headerShown: false }} />

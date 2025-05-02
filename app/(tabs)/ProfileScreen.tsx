@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const backgroundImage = require('../auths/login.png'); // Replace with your local asset
 
@@ -64,6 +65,12 @@ const ProfileScreen = () => {
   return (
     <ImageBackground source={backgroundImage} style={styles.background} resizeMode="cover">
       <StatusBar barStyle="light-content" />
+
+      {/* ✅ Close (X) Icon to go back to HomeScreen */}
+      <TouchableOpacity style={styles.closeIcon} onPress={() => router.replace('/HomeScreen')}>
+        <Ionicons name="close" size={32} color="red" />
+      </TouchableOpacity>
+
       <View style={styles.overlay}>
         <Text style={styles.title}>Profile</Text>
 
@@ -94,6 +101,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  closeIcon: { // ✅ New style for X icon
+    position: 'absolute',
+    top: 50,
+    right: 30,
+    zIndex: 10,
   },
   overlay: {
     width: '85%',

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function FacilityAuthScreen() {
   const [isCreatingAccount, setIsCreatingAccount] = useState(true);
@@ -62,7 +63,7 @@ export default function FacilityAuthScreen() {
       facilityName,
       email,
       password,
-      role: 'admin', // ✅ include admin role
+      role: 'admin',
       facilityDetails: '',
     };
 
@@ -71,7 +72,7 @@ export default function FacilityAuthScreen() {
       setMessage('Facility account created successfully!');
       setMessageType('success');
       await AsyncStorage.setItem('currentFacility', JSON.stringify(facilityData));
-      router.replace('/EnterFacilityDetails'); // ✅ still goes here
+      router.replace('/EnterFacilityDetails');
     } catch (error) {
       console.log(error);
       setMessage('Something went wrong while creating the account.');
@@ -103,10 +104,9 @@ export default function FacilityAuthScreen() {
             setMessageType('success');
 
             await AsyncStorage.setItem('currentFacility', JSON.stringify(arrvalues[i]));
-				await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
+            await AsyncStorage.setItem('prevroute', 'EnterFacilityDetails');
 
-            // ✅ Redirect facility admin to the appointment viewer
-            router.replace('/AdminAppointmentRequestsScreen');
+            router.replace('/FacilityDetail');
             return;
           }
         }
@@ -124,6 +124,10 @@ export default function FacilityAuthScreen() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/LoginScreen')}>
+        <Ionicons name="arrow-back" size={28} color="#fff" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>
         {isCreatingAccount ? 'Create Facility Account' : 'Facility Login'}
       </Text>
@@ -215,6 +219,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 100,
     backgroundColor: '#33ab93',
+  },
+  backIcon: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   title: {
     fontSize: 28,

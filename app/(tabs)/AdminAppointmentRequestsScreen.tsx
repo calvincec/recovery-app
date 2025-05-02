@@ -8,9 +8,11 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 export default function AdminAppointmentRequestsScreen() {
   const [requests, setRequests] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -79,7 +81,13 @@ export default function AdminAppointmentRequestsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => router.push('/FacilityDetail')}>
+        <Text style={styles.backButton}>← Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>Appointment Requests</Text>
+
       {requests.length === 0 ? (
         <Text style={styles.noData}>No appointment requests found.</Text>
       ) : (
@@ -93,67 +101,72 @@ export default function AdminAppointmentRequestsScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#FAFAFA',
-      padding: 20,
-    },
-    title: {
-      fontSize: 26,
-      fontWeight: 'bold',
-      color: '#344d3f',
-      textAlign: 'center',
-      marginBottom: 20,
-    },
-    card: {
-      backgroundColor: '#fff',
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 16,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 6,
-      elevation: 4,
-    },
-    facility: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 6,
-      color: '#333',
-    },
-    info: {
-      fontSize: 14,
-      color: '#666',
-      marginBottom: 4,
-    },
-    status: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginBottom: 10,
-    },
-    noData: {
-      textAlign: 'center',
-      marginTop: 100,
-      fontSize: 16,
-      color: '#999',
-    },
-    buttonRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      gap: 10,
-    },
-    button: {
-      flex: 1,
-      paddingVertical: 10,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginTop: 6,
-    },
-    buttonText: {
-      color: 'white',
-      fontWeight: 'bold',
-    },
-  });
-  
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+    padding: 20,
+  },
+  backButton: {
+    fontSize: 18,
+    color: '#007bff',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#344d3f',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  facility: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    color: '#333',
+  },
+  info: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  status: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  noData: {
+    textAlign: 'center',
+    marginTop: 100,
+    fontSize: 16,
+    color: '#999',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+});

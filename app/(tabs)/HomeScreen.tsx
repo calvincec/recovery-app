@@ -10,21 +10,28 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const backgroundImage = require('../auths/login.png'); // Replace with your image path
-
 
 export default function HomeScreen() {
   const router = useRouter();
 
   const handleProfilePress = () => router.push('/ProfileScreen');
   const handleFacilitiesPress = () => router.push('/FacilitiesScreen');
-  const handleMapsPress = () => router.push('/map');
+  const handleMapsPress = async () => {
+	await AsyncStorage.setItem('maproute', 'HomeScreen');
+	router.push('/map')};
   const navtoChat = () => router.push('/chat');
 
   return (
     <ImageBackground source={backgroundImage} style={styles.background} resizeMode="cover">
       <StatusBar barStyle="light-content" />
+
+      {/* ✅ Back to UserAuthScreen Icon */}
+      <TouchableOpacity onPress={() => router.replace('/UserAuthScreen')} style={styles.backIcon}>
+        <Ionicons name="arrow-back" size={28} color="#fff" />
+      </TouchableOpacity>
 
       {/* Top Profile Icon */}
       <TouchableOpacity onPress={handleProfilePress} style={styles.profileIcon}>
@@ -62,10 +69,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  backIcon: { // ✅ Style for back arrow
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 11,
+  },
   profileIcon: {
     position: 'absolute',
     top: 50,
-    left: 30,
+    left: 70,
     zIndex: 10,
   },
   overlay: {
